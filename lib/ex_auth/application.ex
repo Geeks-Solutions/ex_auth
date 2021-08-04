@@ -12,7 +12,11 @@ defmodule ExAuth.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: ExAuth.PubSub},
       # Start the Endpoint (http/https)
-      ExAuthWeb.Endpoint
+      ExAuthWeb.Endpoint,
+      %{
+        id: ExAuth.AuthClient,
+        start: {ExAuth.AuthClient, :start_link, []}
+      }
       # Start a worker by calling: ExAuth.Worker.start_link(arg)
       # {ExAuth.Worker, arg}
     ]

@@ -7,7 +7,10 @@ defmodule ExAuth.Helpers do
     |> case do
       nil ->
         if opts |> Map.get(:raise, false),
-          do: raise("Please configure #{key} to use ex_auth as desired"),
+          do: raise("Please configure :#{key} to use ex_auth as desired,
+          i.e:
+          config, :ex_auth,
+            #{key}: VALUE_HERE "),
           else: opts |> Map.get(:default)
 
       value ->
@@ -24,7 +27,7 @@ defmodule ExAuth.Helpers do
   end
 
   def endpoint do
-    env(:endpoint, %{raise: true})
+    env(:endpoint, %{raise: false, default: "https://auth.geeks.solutions"})
   end
 
   def endpoint_get_callback(

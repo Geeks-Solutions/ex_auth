@@ -36,7 +36,8 @@ defmodule ExAuth.AuthAPI do
     ])
   end
 
-  def update_user(user, user_id) do
+  ## not to be exposed for the host project internal use only
+  def update_private_user(user, user_id) do
     url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/privateuser/#{user_id}"
 
     Helpers.endpoint_put_callback(url, user, [
@@ -44,6 +45,15 @@ defmodule ExAuth.AuthAPI do
       {"privatekey", Helpers.private_key()}
     ])
   end
+
+  # def update_user(user, token, user_id) do
+  #   url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
+
+  #   Helpers.endpoint_put_callback(url, user, [
+  #     {"content-type", "application/json"},
+  #     {"privatekey", Helpers.private_key()}
+  #   ])
+  # end
 
   def reset_password(user) do
     Helpers.endpoint_post_callback(

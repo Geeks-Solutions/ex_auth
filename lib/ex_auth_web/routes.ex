@@ -27,11 +27,11 @@ defmodule ExAuthWeb.Routes do
   defmacro __using__(options \\ []) do
     scoped = Keyword.get(options, :scope, "/ex_auth")
     custom_pipes = Keyword.get(options, :pipe_through, [])
-    browser_pipes = [:media_browser] ++ custom_pipes
-    api_pipes = [:media_api] ++ custom_pipes
+    # browser_pipes = [:ex_auth_browser] ++ custom_pipes
+    api_pipes = [:ex_auth_api] ++ custom_pipes
 
     quote do
-      pipeline :media_browser do
+      pipeline :ex_auth_browser do
         plug(:accepts, ["html", "json"])
         plug(:fetch_session)
         plug(:fetch_flash)
@@ -39,12 +39,17 @@ defmodule ExAuthWeb.Routes do
         plug(:put_secure_browser_headers)
       end
 
-      pipeline :media_api do
+      pipeline :ex_auth_api do
         plug(:accepts, ["json"])
       end
 
       scope unquote(scoped), ExAuthWeb do
         pipe_through(unquote(api_pipes))
+
+        post("/login", UserController, :login, as: :ex_auth)
+        post("/register", UserController, :register, as: :ex_auth)
+        post("/verify_token", UserController, :verify_token, as: :ex_auth)
+        post("/reset_password", UserController, :reset_password, as: :ex_auth)
       end
     end
   end
