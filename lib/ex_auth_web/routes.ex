@@ -50,6 +50,7 @@ defmodule ExAuthWeb.Routes do
         post("/register", UserController, :register, as: :ex_auth)
         post("/verify_token", UserController, :verify_token, as: :ex_auth)
         post("/reset_password", UserController, :reset_password, as: :ex_auth)
+        put("/new_password", UserController, :new_password, as: :ex_auth)
       end
     end
   end

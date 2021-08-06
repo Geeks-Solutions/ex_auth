@@ -25,6 +25,17 @@ defmodule ExAuthWeb.UserController do
     |> format_response(conn)
   end
 
+  def new_password(conn, %{"token" => token, "new_password" => new_password}) do
+    with %{"data" => %{"token" => _token, "user" => %{"user_id" => id}}} <-
+           AuthAPI.verify_token(token, "reset"),
+         resp <- AuthAPI.update_private_user(%{"password" => new_password}, id) do
+      resp |> format_response(conn)
+    else
+      %{"error" => _error} = err ->
+        err |> format_response(conn)
+    end
+  end
+
   # def update(conn, %{"user_id" => user_id, "user" => user}) do
   #   AuthAPI.update_user(user, user_id)
   #   |> format_response(conn)
