@@ -23,6 +23,11 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# config :auth,
+#   endpoint: "https://users-credentials-saas.k8s-dev.geeks.solutions",
+#   ## websocket_endpoint
+#   ws_endpoint: "wss://users-credentials-saas.k8s-dev.geeks.solutions/socket/websocket"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

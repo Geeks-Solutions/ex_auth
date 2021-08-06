@@ -1,18 +1,25 @@
-# ExAuth
+## ExAuth
 
-To start your Phoenix server:
+ExAuth is a library that serves to integrate your project the fastest way possible with AUTH application. AUTH is a user management system. In order to have users management available for your project all you have to do is the following:
 
-  * Install dependencies with `mix deps.get`
-  * Start Phoenix endpoint with `mix phx.server`
+1. Head to [AUTH registration page](https://auth.geeks.solutions/register).
+2. Register your project.
+3. Retrieve your credentials after redirection. Your credentials are: your `project id` and your `private key`.
+4. Add ex_auth to you `mix.exs`
+5. Add ex_auth configuration as follows:
+ ```elixir
+ config :ex_auth,
+ private_key: "your_private_key",
+ project_id: "your_project_id",
+ endpoint: "https://auth.geeks.solutions", ## endpoint can point to the test site or to the live site.
+ ws_endpoint: "ws://auth.geeks.solutions/socket/websocket"
+ ```
+ 6. Now in order to use the reset password feature, you need to add the following:
+  - In your `config.ex`, add the following: 
+  ```elixir
+  config :ex_auth,
+  reset_password_action: %{module: TestingHelpers, function: :action}
+  ```
+  By specifyin the module and function (arity 1) you are telling `ex_auth` what is the action that your project would like to do when a reset password is requested for a user. This is the function that it will be called.  i.e. some projects send an email.
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+And that's it, you project now have an up and running users management system!

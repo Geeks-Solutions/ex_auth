@@ -6,6 +6,23 @@ defmodule ExAuth.Application do
   use Application
 
   def start(_type, _args) do
+    # Application.get_all_env(:ex_auth) |> IO.inspect()
+    # Application.loaded_applications()
+    # Application.get_env(:ex_auth, :ws_endpoint) |> IO.inspect(label: "HERE")
+    # Application.get_env(:auth, :ws_endpoint) |> IO.inspect(label: "me")
+
+    # Application.put_env(
+    #   :ex_auth,
+    #   :ws_endpoint,
+    #   "wss://users-credentials-saas.k8s-dev.geeks.solutions/socket/websocket"
+    # )
+
+    # Application.put_env(
+    #   :ex_auth,
+    #   :endpoint,
+    #   "https://users-credentials-saas.k8s-dev.geeks.solutions"
+    # )
+
     children = [
       # Start the Telemetry supervisor
       ExAuthWeb.Telemetry,

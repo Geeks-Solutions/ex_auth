@@ -13,9 +13,6 @@ config :ex_auth, ExAuthWeb.Endpoint,
   check_origin: false,
   watchers: []
 
-config :ex_auth,
-  auth_endpoint_url: "http://localhost:5530/"
-
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
