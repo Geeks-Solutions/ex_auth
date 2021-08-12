@@ -18,6 +18,13 @@ defmodule ExAuth.Helpers do
     end
   end
 
+  def headers do
+    [
+      {"content-type", "application/json"},
+      {"privatekey", private_key()}
+    ]
+  end
+
   def project_id do
     env(:project_id, %{raise: true})
   end
