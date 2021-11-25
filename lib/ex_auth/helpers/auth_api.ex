@@ -19,6 +19,18 @@ defmodule ExAuth.AuthAPI do
     Helpers.endpoint_get_callback(url, Helpers.headers())
   end
 
+  def logout(params) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/logout"
+
+    Helpers.endpoint_post_callback(url, params, Helpers.headers())
+  end
+
+  def delete_user(user_id) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/delete/#{user_id}"
+
+    Helpers.endpoint_get_callback(url, Helpers.headers())
+  end
+
   def get_users(filter \\ %{}, limit \\ nil, start \\ 0)
 
   def get_users(filter, limit, _start) when limit in [nil, 0] do
@@ -69,13 +81,10 @@ defmodule ExAuth.AuthAPI do
     Helpers.endpoint_put_callback(url, user, Helpers.headers())
   end
 
-  # def update_user(user, token, user_id) do
+  # def update_user(user, user_id) do
   #   url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
 
-  #   Helpers.endpoint_put_callback(url, user, [
-  #     {"content-type", "application/json"},
-  #     {"privatekey", Helpers.private_key()}
-  #   ])
+  #   Helpers.endpoint_put_callback(url, user, Helpers.headers())
   # end
 
   def reset_password(user) do

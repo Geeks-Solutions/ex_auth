@@ -8,17 +8,15 @@ defmodule ExAuthWeb.Routes do
 
   `:scope` defaults to `"/ex_auth"`
 
-  `:pipe_through` defaults to media's `[:media_browser]`, you can customize the pipeline as you want.
+  `:pipe_through` defaults to ex_auth's `[:ex_auth_api]`, you can customize the pipeline as you want.
 
   The supported routes are:
   ```elixir
-  post("/auth", MediaController, :insert_media, as: :media)
-  put("/auth", MediaController, :update_media, as: :media)
-  get("/media/:id", MediaController, :get_media, as: :media)
-  post("/medias", MediaController, :list_medias, as: :media)
-  delete("/media/:id", MediaController, :delete_media, as: :media)
-  get("/medias/namespaced/:namespace", MediaController, :count_namespace, as: :media)
-
+    post("/login", UserController, :login, as: :ex_auth)
+    post("/register", UserController, :register, as: :ex_auth)
+    post("/verify_token", UserController, :verify_token, as: :ex_auth)
+    post("/reset_password", UserController, :reset_password, as: :ex_auth)
+    put("/new_password", UserController, :new_password, as: :ex_auth)
   ```
   """
 
