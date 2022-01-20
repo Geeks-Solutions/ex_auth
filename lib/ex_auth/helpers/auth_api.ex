@@ -60,6 +60,22 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  def register(%{email: email} = user) do
+    if Helpers.valid_email?(email) do
+      Helpers.endpoint_post_callback(
+        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/register",
+        user,
+        Helpers.headers()
+      )
+    else
+      %{
+        "error" => "Invalid Email Format",
+        "message" => "Please use a valid email",
+        "status" => "failed"
+      }
+    end
+  end
+
   def register(user) do
     Helpers.endpoint_post_callback(
       Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/register",
@@ -81,16 +97,23 @@ defmodule ExAuth.AuthAPI do
     Helpers.endpoint_put_callback(url, user, Helpers.headers())
   end
 
-  # def update_user(user, user_id) do
-  #   url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
+  def update_user(user, user_id) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
 
-  #   Helpers.endpoint_put_callback(url, user, Helpers.headers())
-  # end
+    Helpers.endpoint_put_callback(url, user, Helpers.headers())
+  end
 
   def reset_password(user) do
     Helpers.endpoint_post_callback(
       Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/reset_password",
       user,
+      Helpers.headers()
+    )
+  end
+
+  def get_project_roles() do
+    Helpers.endpoint_get_callback(
+      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/roles",
       Helpers.headers()
     )
   end
