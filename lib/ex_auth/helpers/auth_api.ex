@@ -111,7 +111,7 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
-  def get_project_roles() do
+  def get_project_roles do
     Helpers.endpoint_get_callback(
       Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/roles",
       Helpers.headers()
