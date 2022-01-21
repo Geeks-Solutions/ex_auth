@@ -50,7 +50,7 @@ defmodule ExAuth.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:bcrypt_elixir, "~> 2.0"},
       {:httpoison, "~> 1.8"},
-      {:poison, "~> 4.0.1"},
+      {:poison, ">= 4.0.1"},
       {:phoenix_gen_socket_client, "~> 3.2.2"},
       {:websocket_client, "~> 1.2"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
