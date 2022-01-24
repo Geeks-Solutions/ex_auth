@@ -90,11 +90,39 @@ defmodule ExAuth.AuthAPI do
     Helpers.endpoint_post_callback(url, user, Helpers.headers())
   end
 
+  def update_private_user(%{email: email} = user, user_id) do
+    if Helpers.valid_email?(email) do
+      url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/privateuser/#{user_id}"
+
+      Helpers.endpoint_put_callback(url, user, Helpers.headers())
+    else
+      %{
+        "error" => "Invalid Email Format",
+        "message" => "Please use a valid email",
+        "status" => "failed"
+      }
+    end
+  end
+
   ## not to be exposed for the host project internal use only
   def update_private_user(user, user_id) do
     url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/privateuser/#{user_id}"
 
     Helpers.endpoint_put_callback(url, user, Helpers.headers())
+  end
+
+  def update_user(%{email: email} = user, user_id) do
+    if Helpers.valid_email?(email) do
+      url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
+
+      Helpers.endpoint_put_callback(url, user, Helpers.headers())
+    else
+      %{
+        "error" => "Invalid Email Format",
+        "message" => "Please use a valid email",
+        "status" => "failed"
+      }
+    end
   end
 
   def update_user(user, user_id) do
