@@ -131,6 +131,22 @@ defmodule ExAuth.AuthAPI do
     Helpers.endpoint_put_callback(url, user, Helpers.headers())
   end
 
+  def reset_password(%{"user" => email} = user) do
+    if Helpers.valid_email?(email) do
+      Helpers.endpoint_post_callback(
+        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/reset_password",
+        user,
+        Helpers.headers()
+      )
+    else
+      %{
+        "error" => "Invalid Email Format",
+        "message" => "Please use a valid email",
+        "status" => "failed"
+      }
+    end
+  end
+
   def reset_password(user) do
     Helpers.endpoint_post_callback(
       Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/reset_password",
@@ -142,6 +158,31 @@ defmodule ExAuth.AuthAPI do
   def get_project_roles do
     Helpers.endpoint_get_callback(
       Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/roles",
+      Helpers.headers()
+    )
+  end
+
+  def verify_password(user_id, password) do
+    Helpers.endpoint_post_callback(
+      Helpers.endpoint() <>
+        "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}/verify_password",
+      %{password: password},
+      Helpers.headers()
+    )
+  end
+
+  def send_verification(user_id) do
+    Helpers.endpoint_get_callback(
+      Helpers.endpoint() <>
+        "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}/resend_verification",
+      Helpers.headers()
+    )
+  end
+
+  def verify_user(user_id) do
+    Helpers.endpoint_put_callback(
+      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/verify_user/#{user_id}",
+      %{},
       Helpers.headers()
     )
   end

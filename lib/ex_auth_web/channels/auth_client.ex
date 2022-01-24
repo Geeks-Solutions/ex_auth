@@ -76,6 +76,22 @@ defmodule ExAuth.AuthClient do
     {:ok, state}
   end
 
+  def handle_message(
+        topic,
+        "resend_verification",
+        payload,
+        _transport,
+        state
+      ) do
+    Logger.warn("message on topic #{topic} on AUTH: send_verification #{inspect(payload)}")
+
+    action = Helpers.env(:resend_verification_action, %{raise: true})
+
+    apply(action[:module], action[:function], [payload])
+
+    {:ok, state}
+  end
+
   def handle_message(topic, event, payload, _transport, state) do
     Logger.warn("message on topic #{topic} on auth: #{event} #{inspect(payload)}")
 

@@ -20,6 +20,11 @@ ExAuth is a library that serves to integrate your project the fastest way possib
   config :ex_auth,
   reset_password_action: %{module: TestingHelpers, function: :action}
   ```
+  - This also applies to use the resend_verification feature through: 
+  ```elixir
+  config :ex_auth,
+  resend_verification_action: %{module: TestingHelpers, function: :action}
+  ```
   By specifyin the module and function (arity 1) you are telling `ex_auth` what is the action that your project would like to do when a reset password is requested for a user. This is the function that it will be called.  i.e. some projects send an email.
 
 And that's it, you project now have an up and running users management system!
