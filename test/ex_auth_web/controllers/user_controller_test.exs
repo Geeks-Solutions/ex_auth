@@ -72,7 +72,7 @@ defmodule ExAuthWeb.UserControllerTest do
     test "POST /reset_password success", %{conn: conn} do
       conn =
         post(conn, Routes.ex_auth_path(conn, :reset_password), %{
-          "user" => "valid"
+          "user" => "valid@email.com"
         })
 
       assert json_response(conn, 200)

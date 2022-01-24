@@ -25,7 +25,7 @@ defmodule ExAuthWeb.MockController do
     return_failure(conn)
   end
 
-  def reset_password(conn, %{"user" => "valid"} = user) do
+  def reset_password(conn, %{"user" => "valid@email.com"} = user) do
     return_success(conn, user)
   end
 
