@@ -28,7 +28,7 @@ defmodule ExAuth.AuthAPI do
   def delete_user(user_id) do
     url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/delete/#{user_id}"
 
-    Helpers.endpoint_get_callback(url, Helpers.headers())
+    Helpers.endpoint_delete_callback(url, Helpers.headers())
   end
 
   def get_users(filter \\ %{}, limit \\ nil, start \\ 0)
