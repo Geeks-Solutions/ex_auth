@@ -171,11 +171,10 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
-  def send_verification(user_id, metadata \\ %{}) do
-    Helpers.endpoint_post_callback(
+  def send_verification(user_id) do
+    Helpers.endpoint_get_callback(
       Helpers.endpoint() <>
         "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}/resend_verification",
-      %{"metadata" => metadata},
       Helpers.headers()
     )
   end
