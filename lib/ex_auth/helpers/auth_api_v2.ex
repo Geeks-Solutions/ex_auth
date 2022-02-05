@@ -23,7 +23,7 @@ defmodule ExAuth.AuthAPIV2 do
     Helpers.endpoint_post_callback(
       Helpers.endpoint() <>
         "/api/v2/project/#{Helpers.project_id()}/users?#{pagination}",
-        filter,
+      filter,
       Helpers.headers()
     )
   end
@@ -36,6 +36,4 @@ defmodule ExAuth.AuthAPIV2 do
       Helpers.headers()
     )
   end
-
-
 end
