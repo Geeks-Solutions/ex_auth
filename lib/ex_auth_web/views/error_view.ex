@@ -15,6 +15,6 @@ defmodule ExAuthWeb.ErrorView do
   end
 
   def render("error.json", %{error: error}) do
-    error
+    %{message: error}
   end
 end
