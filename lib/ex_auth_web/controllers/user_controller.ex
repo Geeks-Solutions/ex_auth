@@ -29,9 +29,14 @@ defmodule ExAuthWeb.UserController do
     do: invalid_params(conn, "Please enter a valid password.")
 
   def new_password(conn, %{"token" => token, "new_password" => new_password}) do
-    res = AuthAPI.new_password(%{"password" => new_password, "token" => token})
-
-    res |> format_response(conn)
+    with %{"data" => %{"token" => _token, "user" => %{"user_id" => id}}} <-
+           AuthAPI.verify_token(token, "reset"),
+         resp <- AuthAPI.update_private_user(%{"password" => new_password}, id) do
+      resp |> format_response(conn)
+    else
+      %{"error" => _error} = err ->
+        err |> format_response(conn)
+    end
   end
 
   # def update(conn, %{"user_id" => user_id, "user" => user}) do
