@@ -111,6 +111,12 @@ defmodule ExAuth.AuthAPI do
     Helpers.endpoint_put_callback(url, user, Helpers.headers())
   end
 
+  def new_password(user) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/new_password"
+
+    Helpers.endpoint_post_callback(url, user, Helpers.headers())
+  end
+
   def update_user(%{email: email} = user, user_id) do
     if Helpers.valid_email?(email) do
       url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
