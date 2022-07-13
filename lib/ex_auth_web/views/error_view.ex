@@ -14,6 +14,10 @@ defmodule ExAuthWeb.ErrorView do
     Phoenix.Controller.status_message_from_template(template)
   end
 
+  def render("error.json", %{error: error}) when is_binary(error) do
+    %{message: error}
+  end
+
   def render("error.json", %{error: error}) do
     error
   end
