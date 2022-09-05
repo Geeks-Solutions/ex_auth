@@ -2,7 +2,7 @@ defmodule ExAuth.Helpers do
   @moduledoc """
   Helper functions for the library
   """
-  @email_regex ~r/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/
+  @email_regex ~r/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
   def env(key, opts \\ %{default: nil, raise: false}) do
     Application.get_env(:ex_auth, key)
     |> case do
