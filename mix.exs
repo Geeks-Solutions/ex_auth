@@ -52,7 +52,7 @@ defmodule ExAuth.MixProject do
       {:httpoison, "~> 1.8"},
       {:poison, ">= 4.0.1"},
       {:phoenix_gen_socket_client, "~> 3.2.2"},
-      {:websocket_client, "~> 1.2"},
+      {:websocket_client, "~> 1.5"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.10", only: :test}
     ]

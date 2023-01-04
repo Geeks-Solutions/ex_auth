@@ -31,7 +31,7 @@ defmodule ExAuth.Helpers do
   end
 
   def private_key do
-    env(:private_key, %{raise: true}) |> Bcrypt.hash_pwd_salt()
+    env(:private_key, %{raise: true})
   end
 
   def endpoint do

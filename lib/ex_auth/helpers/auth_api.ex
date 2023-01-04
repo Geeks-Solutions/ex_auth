@@ -186,4 +186,11 @@ defmodule ExAuth.AuthAPI do
       Helpers.headers()
     )
   end
+
+  def login_as_user(user_id) do
+    Helpers.endpoint_get_callback(
+      "#{Helpers.endpoint()}/api/v1/project/#{Helpers.project_id()}/login/#{user_id}",
+      Helpers.headers()
+    )
+  end
 end
