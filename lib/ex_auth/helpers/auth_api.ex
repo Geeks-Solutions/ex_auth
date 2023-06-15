@@ -193,4 +193,34 @@ defmodule ExAuth.AuthAPI do
       Helpers.headers()
     )
   end
+
+ @doc """
+  Returns the url of the social media provider to send the user to so he authenticates with his Social account.
+  The provider will then redirect the user to the `redirect_uri` with a code that must be used server side
+  to collect the fields data.
+ """
+ def get_social_connect_link(provider, redirect_uri, scopes \\ nil) do
+  scopes = if is_nil(scopes), do: "", else: "&scope[]=#{Enum.join(scopes, "&scope[]=")}"
+  Helpers.endpoint_get_callback(
+    Helpers.endpoint() <>
+      "/api/v1/project/#{Helpers.project_id()}/auth/#{provider}?redirect_uri=#{redirect_uri}#{scopes}",
+      Helpers.headers()
+  )
+ end
+
+ @doc """
+  Provided the code obtained from the authentication step, this will return the fields for the user account
+  alongside the operation type
+   - `register` if the user is not yet registered to auth
+   - `login` if a user with the same login field already exists
+  In case of a login, the response will also include a user_token
+ """
+ def social_connect(provider, code, redirect_uri, fields \\ nil) do
+  fields = if is_nil(fields), do: "", else: "&fields[]=#{Enum.join(fields, "&fields[]=")}"
+  Helpers.endpoint_get_callback(
+    Helpers.endpoint() <>
+      "/api/v1/auth/project/#{Helpers.project_id()}/#{provider}/callback?code=#{code}&redirect_uri=#{redirect_uri}#{fields}",
+      Helpers.headers()
+  )
+ end
 end
