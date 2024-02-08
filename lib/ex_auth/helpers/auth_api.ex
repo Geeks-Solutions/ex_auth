@@ -223,4 +223,31 @@ defmodule ExAuth.AuthAPI do
       Helpers.headers()
   )
  end
+
+ @doc """
+ Takes an ID as a parameter to return a challenge for signature.
+ The nature of the challenge depends on the configuration of the `login_field` on the project
+ """
+ def get_challenge(id) do
+   Helpers.endpoint_post_callback(
+    Helpers.endpoint() <>
+    "/api/v1/project/#{Helpers.project_id()}/login_challenge",
+    id,
+    Helpers.headers()
+   )
+ end
+
+ @doc """
+ Given an ID, a challenge and the signature of this challenge, it validates the signature and returns a user token.
+ It will register a new user if the ID is new
+ It will login the user carrying the ID if it exists already
+ """
+ def connect(connect) do
+  Helpers.endpoint_post_callback(
+    Helpers.endpoint() <>
+    "/api/v1/project/#{Helpers.project_id()}/connect",
+    connect,
+    Helpers.headers()
+  )
+ end
 end
