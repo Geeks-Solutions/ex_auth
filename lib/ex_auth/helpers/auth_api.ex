@@ -19,7 +19,10 @@ defmodule ExAuth.AuthAPI do
     Helpers.endpoint_get_callback(url, Helpers.headers())
   end
 
-  def logout(params) do
+  @doc """
+  Provided a `token` it will revoke it to avoid further usage
+  """
+  def logout(%{token: _} = params) do
     url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/logout"
 
     Helpers.endpoint_post_callback(url, params, Helpers.headers())
