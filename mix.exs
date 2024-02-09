@@ -4,10 +4,10 @@ defmodule ExAuth.MixProject do
   def project do
     [
       app: :ex_auth,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -56,7 +56,10 @@ defmodule ExAuth.MixProject do
       {:phoenix_gen_socket_client, "~> 3.2.2"},
       {:websocket_client, "~> 1.5"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.10", only: :test}
+      {:excoveralls, "~> 0.10", only: :test},
+      {:ex_geeks,
+        git: "https://github.com/Geeks-Solutions/ex_geeks",
+        ref: "ab4adf120f22dc4f047f2299c8cbedaecfe938c4"}
     ]
   end
 
