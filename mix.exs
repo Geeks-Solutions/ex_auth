@@ -59,7 +59,7 @@ defmodule ExAuth.MixProject do
       {:excoveralls, "~> 0.10", only: :test},
       {:ex_geeks,
         git: "https://github.com/Geeks-Solutions/ex_geeks",
-        ref: "ab4adf120f22dc4f047f2299c8cbedaecfe938c4"}
+        ref: "a6dbf400b0df0e4c337c91aa7123dfd96f0292d5"}
     ]
   end
 

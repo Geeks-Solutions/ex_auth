@@ -38,79 +38,7 @@ defmodule ExAuth.Helpers do
     env(:endpoint, %{raise: false, default: "https://auth.geeks.solutions"})
   end
 
-  def endpoint_get_callback(
-        url,
-        headers \\ [{"content-type", "application/json"}]
-      ) do
-    case HTTPoison.get(url, headers) do
-      {:ok, response} ->
-        fetch_response_body(response)
-
-      {:error, error} ->
-        {:error, error}
-    end
-  end
-
-  def endpoint_put_callback(
-        url,
-        args,
-        headers \\ [{"content-type", "application/json"}]
-      ) do
-    {:ok, body} = args |> Poison.encode()
-
-    case HTTPoison.put(url, body, headers) do
-      {:ok, response} ->
-        fetch_response_body(response)
-
-      {:error, _error} ->
-        {:error, "users credentials server error"}
-    end
-  end
-
-  def endpoint_post_callback(
-        url,
-        args,
-        headers \\ [{"content-type", "application/json"}]
-      ) do
-    {:ok, body} = args |> Poison.encode()
-
-    case HTTPoison.post(url, body, headers) do
-      {:ok, response} ->
-        fetch_response_body(response)
-
-      {:error, _error} ->
-        {:error, "users credentials server error"}
-    end
-  end
-
   def valid_email?(email) do
     String.match?(email, @email_regex)
-  end
-
-  def endpoint_delete_callback(
-        url,
-        headers \\ [{"content-type", "application/json"}]
-      ) do
-    # to use a delete request with a body
-    # refer to Httpoison.request/5
-    # {:ok, body} = args |> Poison.encode()
-
-    case HTTPoison.delete(url, headers) do
-      {:ok, response} ->
-        fetch_response_body(response)
-
-      {:error, _error} ->
-        {:error, "users credentials server error"}
-    end
-  end
-
-  defp fetch_response_body(response) do
-    case Poison.decode(response.body) do
-      {:ok, body} ->
-        body
-
-      _ ->
-        {:error, response.body}
-    end
   end
 end
