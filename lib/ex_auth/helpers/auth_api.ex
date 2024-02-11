@@ -243,8 +243,8 @@ defmodule ExAuth.AuthAPI do
 
  @doc """
  Given an ID, a challenge and the signature of this challenge, it validates the signature and returns a user token.
- It will register a new user if the ID is new
- It will login the user carrying the ID if it exists already
+ - It will register a new user if the ID is new
+ - It will login the user carrying the ID if it exists already
  """
  def connect(connect) do
   GeeksHelpers.endpoint_post_callback(
