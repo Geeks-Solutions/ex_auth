@@ -10,7 +10,7 @@ defmodule ExAuth.AuthClient do
     GenSocketClient.start_link(
       __MODULE__,
       Phoenix.Channels.GenSocketClient.Transport.WebSocketClient,
-      Helpers.env(:ws_endpoint, %{raise: true}),
+      Helpers.ws_endpoint(),
       [],
       name: :auth_websocket
     )

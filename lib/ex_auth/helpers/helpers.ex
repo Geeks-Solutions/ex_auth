@@ -38,6 +38,10 @@ defmodule ExAuth.Helpers do
     env(:endpoint, %{raise: false, default: "https://auth.geeks.solutions"})
   end
 
+  def ws_endpoint do
+    env(:ws_endpoint, %{raise: false, default: "wss://auth.geeks.solutions/socket/websocket"})
+  end
+
   def valid_email?(email) do
     String.match?(email, @email_regex)
   end
