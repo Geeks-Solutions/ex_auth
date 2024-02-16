@@ -6,12 +6,12 @@ defmodule ExAuth.AuthAPI do
   alias ExGeeks.Helpers, as: GeeksHelpers
 
   def verify_token(token, type \\ "login") do
-    query_params = "?token=#{token}&type=#{type}"
     project_id = Helpers.project_id()
+    body = %{token: token, type: type}
 
-    url = Helpers.endpoint() <> "/api/v1/project/#{project_id}/verify_token" <> query_params
+    url = Helpers.endpoint() <> "/api/v1/project/#{project_id}/verify_token"
 
-    GeeksHelpers.endpoint_post_callback(url, %{}, Helpers.headers())
+    GeeksHelpers.endpoint_post_callback(url, body, Helpers.headers())
   end
 
   def get_user(user_id) do
