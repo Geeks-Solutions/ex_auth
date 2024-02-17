@@ -41,8 +41,8 @@ defmodule ExAuth.MixProject do
   defp deps do
     [
       {:phoenix, ">= 1.5.0"},
-      {:phoenix_html, ">= 2.11.0"},
-      {:phoenix_html_helpers, "~> 1.0"},
+      {:phoenix_html, ">= 2.11.0", optional: true},
+      {:phoenix_html_helpers, "~> 1.0", optional: true},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:telemetry_metrics, "~> 0.4"},
@@ -59,7 +59,7 @@ defmodule ExAuth.MixProject do
       {:excoveralls, "~> 0.10", only: :test},
       {:ex_geeks,
         git: "https://github.com/Geeks-Solutions/ex_geeks",
-        ref: "6eb6017780c4471cfd3816d73b2661beb97c8f1a"}
+        ref: "c1c94999456fb766bf246a878ba2e98405edf04b"}
     ]
   end
 
