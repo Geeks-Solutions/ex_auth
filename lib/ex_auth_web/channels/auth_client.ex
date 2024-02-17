@@ -67,7 +67,7 @@ defmodule ExAuth.AuthClient do
         _transport,
         state
       ) do
-    Logger.warning("message on topic #{topic} on AUTH: reset_password #{inspect(payload)}")
+    Logger.info("message on topic #{topic} on AUTH: reset_password #{inspect(payload)}")
     # Utils.send_email("reset_password", [user["email"]], token)
     action = Helpers.env(:reset_password_action, %{raise: true})
 
@@ -83,7 +83,7 @@ defmodule ExAuth.AuthClient do
         _transport,
         state
       ) do
-    Logger.warning("message on topic #{topic} on AUTH: send_verification #{inspect(payload)}")
+    Logger.info("message on topic #{topic} on AUTH: send_verification #{inspect(payload)}")
 
     action = Helpers.env(:resend_verification_action, %{raise: true})
 
@@ -93,7 +93,7 @@ defmodule ExAuth.AuthClient do
   end
 
   def handle_message(topic, event, payload, _transport, state) do
-    Logger.warning("message on topic #{topic} on auth: #{event} #{inspect(payload)}")
+    Logger.info("message on topic #{topic} on auth: #{event} #{inspect(payload)}")
 
     {:ok, state}
   end
