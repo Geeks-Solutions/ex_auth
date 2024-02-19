@@ -29,7 +29,7 @@ defmodule ExAuth.AuthAPIV2 do
     )
   end
 
-  def send_verification(user_id, metadata \\ %{}) do
+  def send_verification(user_id, metadata \\ %{}) when not is_nil(user_id) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
         "/api/v2/project/#{Helpers.project_id()}/user/#{user_id}/resend_verification",
@@ -37,4 +37,6 @@ defmodule ExAuth.AuthAPIV2 do
       Helpers.headers()
     )
   end
+
+  def send_verification(_ ,_ ), do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
 end
