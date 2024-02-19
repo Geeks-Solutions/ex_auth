@@ -2,6 +2,7 @@ defmodule ExAuth.Plug.AbsintheContext do
     @moduledoc """
     Extracts User information for a valid Auth Token present in the header
     as `authorization Bearer {token}`
+    Also supports the `token-type: {type}` header (default to `login`, can also be `reset`)
     """
     @behaviour Plug
     import Plug.Conn
@@ -19,7 +20,7 @@ defmodule ExAuth.Plug.AbsintheContext do
 
       else
         {:absinthe, {:error, _}} ->
-          Logger.error("Can't use the Absinthe Plug without Absinthe")
+          Logger.error("ex_auth: Can't use the Absinthe Plug without Absinthe")
           conn
 
         %{error: _} = context ->
@@ -36,9 +37,11 @@ defmodule ExAuth.Plug.AbsintheContext do
       end
     end
 
-    defp user_process(conn, type) do
+    defp user_process(conn, []), do: user_process(conn, ["login"])
+
+    defp user_process(conn, [type]) do
       with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-           {:ok, current_user} <- authorize(token) do
+           {:ok, current_user} <- authorize(token, type) do
         %{current_user: current_user, token: token, token_type: type} |> add_fields(conn)
       else
         {:error, "invalid authorization token"} ->
@@ -121,7 +124,7 @@ defmodule ExAuth.Plug.AbsintheContext do
       case AuthAPI.verify_token(token, type) do
         %{
           "data" => %{
-            "token" => %{"token" => _token, "type" => _type},
+            "token" => %{"token" => _token, "type" => ^type},
             "user" => user
           }
         } ->
@@ -133,9 +136,9 @@ defmodule ExAuth.Plug.AbsintheContext do
            }}
         %{"message" => err, "status" => "failed"} ->
           Logger.error("GQL Context: #{err}")
-          {:error, "GQL Context: #{err}"}
+          {:error, "ex_auth: GQL Context - #{err}"}
         %{"error" => _} ->
-          Logger.error("GQL Context: invalid authorization token")
+          Logger.error("ex_auth: GQL Context - invalid authorization token")
           {:error, "invalid authorization token"}
       end
     end

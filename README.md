@@ -14,17 +14,18 @@ ExAuth is a library that serves to integrate your project the fastest way possib
  endpoint: "https://auth.geeks.solutions", ## endpoint can point to the test site or to the live site.
  ws_endpoint: "ws://auth.geeks.solutions/socket/websocket"
  ```
- 6. Now in order to use the reset password feature, you need to add the following:
-  - In your `config.ex`, add the following: 
-  ```elixir
-  config :ex_auth,
-  reset_password_action: %{module: TestingHelpers, function: :action}
-  ```
-  - This also applies to use the resend_verification feature through: 
-  ```elixir
-  config :ex_auth,
-  resend_verification_action: %{module: TestingHelpers, function: :action}
-  ```
-  By specifying the module and function (arity 1) you are telling `ex_auth` what is the action that your project would like to do when a reset password is requested for a user. This is the function that will be called.  i.e. some projects send an email.
+6. Now in order to use the reset password feature, you need to add the following:
+ - In your `config.ex`, add the following: 
+ ```elixir
+ config :ex_auth,
+ reset_password_action: %{module: TestingHelpers, function: :action}
+ ```
+ - This also applies to use the resend_verification feature through: 
+ ```elixir
+ config :ex_auth,
+ resend_verification_action: %{module: TestingHelpers, function: :action}
+ ```
+ By specifying the module and function (arity 1) you are telling `ex_auth` what is the action that your project would like to do when a reset password is requested for a user. This is the function that will be called.  i.e. some projects send an email.
+7. If your project uses absinthe this library provides the `ExAuth.Plug.AbsintheContext` plug to use in your router pipeline to automatically populate your context with the user information when providing a valid auth token 
 
 And that's it, you project now have an up and running users management system!

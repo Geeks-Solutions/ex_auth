@@ -25,7 +25,7 @@ defmodule ExAuth.AuthClient do
   end
 
   def handle_connected(transport, state) do
-    Logger.info("connected to auth")
+    Logger.info("ex_auth: connected to socket")
 
     GenSocketClient.join(
       transport,
@@ -37,24 +37,24 @@ defmodule ExAuth.AuthClient do
   end
 
   def handle_disconnected(reason, state) do
-    Logger.error("disconnected from AUTH: #{inspect(reason)}")
+    Logger.error("ex_auth: disconnected - #{inspect(reason)}")
     Process.send_after(self(), :connect, :timer.seconds(1))
     {:ok, state}
   end
 
   def handle_joined(topic, _payload, _transport, state) do
-    Logger.info("joined the topic #{topic} on AUTH!!!!!")
+    Logger.info("ex_auth: joined the topic #{topic}")
 
     {:ok, state}
   end
 
   def handle_join_error(topic, payload, _transport, state) do
-    Logger.error("join error on the topic #{topic} on AUTH: #{inspect(payload)}")
+    Logger.error("ex_auth: join error on the topic #{topic} - #{inspect(payload)}")
     {:ok, state}
   end
 
   def handle_channel_closed(topic, payload, _transport, state) do
-    Logger.error("disconnected from the topic #{topic} on AUTH: #{inspect(payload)}")
+    Logger.error("ex_auth: disconnected from the topic #{topic} - #{inspect(payload)}")
 
     Process.send_after(self(), {:join, topic}, :timer.seconds(1))
     {:ok, state}
@@ -67,7 +67,7 @@ defmodule ExAuth.AuthClient do
         _transport,
         state
       ) do
-    Logger.info("message on topic #{topic} on AUTH: reset_password #{inspect(payload)}")
+    Logger.debug("ex_auth: message on topic #{topic} - reset_password #{inspect(payload)}")
     # Utils.send_email("reset_password", [user["email"]], token)
     action = Helpers.env(:reset_password_action, %{raise: true})
 
@@ -83,7 +83,7 @@ defmodule ExAuth.AuthClient do
         _transport,
         state
       ) do
-    Logger.info("message on topic #{topic} on AUTH: send_verification #{inspect(payload)}")
+    Logger.debug("ex_auth: message on topic #{topic} - send_verification #{inspect(payload)}")
 
     action = Helpers.env(:resend_verification_action, %{raise: true})
 
@@ -93,33 +93,33 @@ defmodule ExAuth.AuthClient do
   end
 
   def handle_message(topic, event, payload, _transport, state) do
-    Logger.info("message on topic #{topic} on auth: #{event} #{inspect(payload)}")
+    Logger.debug("ex_auth: message on topic #{topic} - #{event} #{inspect(payload)}")
 
     {:ok, state}
   end
 
   def handle_call(request, from, _transport, state) do
-    Logger.warning("message from #{inspect(from)} on auth: #{inspect(request)}")
+    Logger.debug("ex_auth: message from #{inspect(from)} - #{inspect(request)}")
 
     {:reply, "ok", state}
   end
 
   def handle_reply(topic, _ref, payload, _transport, state) do
-    Logger.warning("message on topic #{topic} on auth: #{inspect(payload)}")
+    Logger.debug("ex_auth: message on topic #{topic} - #{inspect(payload)}")
     {:ok, state}
   end
 
   def handle_info(:connect, _transport, state) do
-    # Logger.info("connecting")
+    Logger.debug("ex_auth: connecting")
     {:connect, state}
   end
 
   def handle_info({:join, topic}, transport, state) do
-    Logger.info("joining the topic #{topic}")
+    Logger.debug("ex_auth: joining the topic #{topic}")
 
     case GenSocketClient.join(transport, topic, payload()) do
       {:error, reason} ->
-        Logger.error("error joining the topic #{topic} on auth: #{inspect(reason)}")
+        Logger.error("ex_auth: error joining the topic #{topic} - #{inspect(reason)}")
 
         Process.send_after(self(), {:join, topic}, :timer.seconds(1))
 
@@ -131,13 +131,13 @@ defmodule ExAuth.AuthClient do
   end
 
   def handle_info(:ping_server, _transport, state) do
-    Logger.info("sending ping ##{state.ping_ref}")
+    Logger.debug("ex_auth: sending ping ##{state.ping_ref}")
     # GenSocketClient.push(transport, "ping", "ping", %{ping_ref: state.ping_ref})
     {:ok, %{state | ping_ref: state.ping_ref + 1}}
   end
 
   def handle_info(message, _transport, state) do
-    Logger.warning("Unhandled message #{inspect(message)}")
+    Logger.warning("ex_auth: Unhandled message #{inspect(message)}")
     {:ok, state}
   end
 
