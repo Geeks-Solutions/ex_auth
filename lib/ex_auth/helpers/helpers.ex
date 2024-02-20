@@ -42,6 +42,10 @@ defmodule ExAuth.Helpers do
     env(:ws_endpoint, %{raise: false, default: "wss://auth.geeks.solutions/socket/websocket"})
   end
 
+  # This version is required in case a user wants to empty his email when this is not
+  # a login field
+  def valid_email?(nil), do: true
+
   def valid_email?(email) do
     String.match?(email, @email_regex)
   end
