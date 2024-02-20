@@ -44,7 +44,7 @@ defmodule ExAuth.Helpers do
 
   # This version is required in case a user wants to empty his email when this is not
   # a login field
-  def valid_email?(nil), do: true
+  def valid_email?(email) when is_nil(email) or email == "", do: true
 
   def valid_email?(email) do
     String.match?(email, @email_regex)
