@@ -5,6 +5,14 @@ defmodule ExAuth.AuthAPI do
   alias ExAuth.Helpers
   alias ExGeeks.Helpers, as: GeeksHelpers
 
+  @doc """
+  This function will clear all caches that have been set by ex_auth
+  forcing a refresh when functions requiring the data are called
+  """
+  def clear_cache do
+    Helpers.cache_delete(:roles)
+  end
+
   def verify_token(token, type \\ "login") do
     project_id = Helpers.project_id()
     body = %{token: token, type: type}
@@ -159,11 +167,30 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
-  def get_project_roles do
-    GeeksHelpers.endpoint_get_callback(
-      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/roles",
-      Helpers.headers()
-    )
+  @doc """
+  Will get all the roles set in your AUTH project
+  If you enabled caching, the results will be stored locally and you can refresh it by providing the `true` param
+  If caching is not enabled, it will run a request to auth everytime this is called
+  """
+  def get_project_roles(refresh \\ false) do
+    roles = Helpers.cache_get(:roles)
+    if is_nil(roles) or refresh do
+      %{"data" => roles} = GeeksHelpers.endpoint_get_callback(
+        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/roles",
+        Helpers.headers()
+      )
+      Helpers.cache_set(:roles, roles)
+      roles
+    else
+      roles
+    end
+  end
+
+  def get_role_id(role_title) do
+    [role_object] = get_project_roles()
+    |> Enum.filter(fn %{"title" => title} -> title == role_title end)
+
+    Map.get(role_object, "id")
   end
 
   def verify_password(user_id, password) do

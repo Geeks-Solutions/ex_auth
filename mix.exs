@@ -57,9 +57,10 @@ defmodule ExAuth.MixProject do
       {:websocket_client, "~> 1.5"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
+      # {:ex_geeks, path: "/Users/julien/Documents/Repos/Gitlab/Geeks/Libraries/ex_geeks"}
       {:ex_geeks,
         git: "https://github.com/Geeks-Solutions/ex_geeks",
-        ref: "9ff2e7e86583eeb3e7cc6864aefb5fd630cf11e8"}
+        ref: "49c027c88ea91211009a98eeb168e4d4a2519a6c"}
     ]
   end
 

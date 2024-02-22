@@ -49,4 +49,22 @@ defmodule ExAuth.Helpers do
   def valid_email?(email) do
     String.match?(email, @email_regex)
   end
+
+  def cache_get(key) do
+    if env(:cache, %{raise: false, default: false}),
+    do: ExGeeks.EtsCaching.get(:ex_auth, key),
+    else: nil
+  end
+
+  def cache_set(key, value) do
+    if env(:cache, %{raise: false, default: false}),
+    do: ExGeeks.EtsCaching.set(:ex_auth, key, value),
+    else: nil
+  end
+
+  def cache_delete(key) do
+    if env(:cache, %{raise: false, default: false}),
+    do: ExGeeks.EtsCaching.delete(:ex_auth, key),
+    else: nil
+  end
 end
