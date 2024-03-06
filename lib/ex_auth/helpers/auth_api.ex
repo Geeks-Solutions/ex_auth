@@ -193,6 +193,18 @@ defmodule ExAuth.AuthAPI do
     Map.get(role_object, "id")
   end
 
+  @doc """
+  Provided a valid role_id will return the full role object
+  title and id
+  It is strongly advised to enable caching when calling this function
+  to avoid multiple requests to the Auth API
+  """
+  def get_role_object(role_id) do
+    [role_object] = get_project_roles()
+    |> Enum.filter(fn %{"id" => id} -> id == role_id end)
+    role_object
+  end
+
   def verify_password(user_id, password) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
