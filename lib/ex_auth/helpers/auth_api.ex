@@ -293,4 +293,28 @@ defmodule ExAuth.AuthAPI do
     Helpers.headers()
   )
  end
+
+ @doc """
+ Provides the result of the dashboard for the given facets:
+ - facets: a list of facet ['totalRegisteredUsers','referrerLeaderboard' etc..]
+ - (optional) time_start: a timestamp to define the start date for range facets
+ - (optional) time_end: a timestamp to define the end date for range facets
+ """
+ def dashboard(facets) do
+  GeeksHelpers.endpoint_post_callback(
+    Helpers.endpoint() <>
+    "/api/v1/project/#{Helpers.project_id()}/dashboard",
+    %{"facets" => facets},
+    Helpers.headers()
+  )
+ end
+
+ def dashboard(facets, time_start, time_end) do
+  GeeksHelpers.endpoint_post_callback(
+    Helpers.endpoint() <>
+    "/api/v1/project/#{Helpers.project_id()}/dashboard",
+    %{"facets" => facets, "timeframe" => %{"start" => time_start, "end" => time_end}},
+    Helpers.headers()
+  )
+ end
 end
