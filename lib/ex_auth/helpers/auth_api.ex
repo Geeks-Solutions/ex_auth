@@ -243,11 +243,15 @@ defmodule ExAuth.AuthAPI do
   to collect the fields data.
  """
  def get_social_connect_link(provider, redirect_uri, scopes \\ nil) do
-  scopes = if is_nil(scopes), do: "", else: "&scope[]=#{Enum.join(scopes, "&scope[]=")}"
+  oauth_link([provider: provider, redirect_uri: redirect_uri, scopes: scopes])
+ end
+
+ def oauth_link([provider: provider, redirect_uri: redirect_uri] = params, opts \\ []) do
+  scopes = if is_nil(params[:scopes]), do: "", else: "&scope[]=#{Enum.join(params[:scopes], "&scope[]=")}"
   GeeksHelpers.endpoint_get_callback(
     Helpers.endpoint() <>
       "/api/v1/project/#{Helpers.project_id()}/auth/#{provider}?redirect_uri=#{redirect_uri}#{scopes}",
-      Helpers.headers()
+      Helpers.headers(opts[:token])
   )
  end
 
@@ -259,11 +263,15 @@ defmodule ExAuth.AuthAPI do
   In case of a login, the response will also include a user_token
  """
  def social_connect(provider, code, redirect_uri, fields \\ nil) do
-  fields = if is_nil(fields), do: "", else: "&fields[]=#{Enum.join(fields, "&fields[]=")}"
+  oauth_token([provider: provider, code: code, redirect_uri: redirect_uri, fields: fields])
+ end
+
+ def oauth_token([provider: provider, code: code, redirect_uri: redirect_uri] = params, opts \\ []) do
+  fields = if is_nil(params[:fields]), do: "", else: "&fields[]=#{Enum.join(params[:fields], "&fields[]=")}"
   GeeksHelpers.endpoint_get_callback(
     Helpers.endpoint() <>
       "/api/v1/auth/project/#{Helpers.project_id()}/#{provider}/callback?code=#{code}&redirect_uri=#{redirect_uri}#{fields}",
-      Helpers.headers()
+      Helpers.headers(opts[:token])
   )
  end
 

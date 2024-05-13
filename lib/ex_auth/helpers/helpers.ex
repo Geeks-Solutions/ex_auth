@@ -26,6 +26,15 @@ defmodule ExAuth.Helpers do
     ]
   end
 
+  def headers(nil), do: headers()
+
+  def headers(token) do
+    [
+      {"content-type", "application/json"},
+      {"token", token}
+    ]
+  end
+
   def project_id do
     env(:project_id, %{raise: true})
   end
