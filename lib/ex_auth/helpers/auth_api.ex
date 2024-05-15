@@ -246,11 +246,12 @@ defmodule ExAuth.AuthAPI do
   oauth_link([provider: provider, redirect_uri: redirect_uri, scopes: scopes])
  end
 
- def oauth_link([provider: provider, redirect_uri: redirect_uri] = params, opts \\ []) do
+ def oauth_link(params, opts \\ []) do
+  if is_nil(params[:provider]) or is_nil(params[:redirect_uri]), do: raise("provider and redirect_uri are mandatory")
   scopes = if is_nil(params[:scopes]), do: "", else: "&scope[]=#{Enum.join(params[:scopes], "&scope[]=")}"
   GeeksHelpers.endpoint_get_callback(
     Helpers.endpoint() <>
-      "/api/v1/project/#{Helpers.project_id()}/auth/#{provider}?redirect_uri=#{redirect_uri}#{scopes}",
+      "/api/v1/project/#{Helpers.project_id()}/auth/#{params[:provider]}?redirect_uri=#{params[:redirect_uri]}#{scopes}",
       Helpers.headers(opts[:token])
   )
  end
@@ -266,11 +267,12 @@ defmodule ExAuth.AuthAPI do
   oauth_token([provider: provider, code: code, redirect_uri: redirect_uri, fields: fields])
  end
 
- def oauth_token([provider: provider, code: code, redirect_uri: redirect_uri] = params, opts \\ []) do
+ def oauth_token(params, opts \\ []) do
+  if is_nil(params[:provider]) or is_nil(params[:code]) or is_nil(params[:redirect_uri]), do: raise("provider, code and redirect_uri are mandatory")
   fields = if is_nil(params[:fields]), do: "", else: "&fields[]=#{Enum.join(params[:fields], "&fields[]=")}"
   GeeksHelpers.endpoint_get_callback(
     Helpers.endpoint() <>
-      "/api/v1/auth/project/#{Helpers.project_id()}/#{provider}/callback?code=#{code}&redirect_uri=#{redirect_uri}#{fields}",
+      "/api/v1/auth/project/#{Helpers.project_id()}/#{params[:provider]}/callback?code=#{params[:code]}&redirect_uri=#{params[:redirect_uri]}#{fields}",
       Helpers.headers(opts[:token])
   )
  end
