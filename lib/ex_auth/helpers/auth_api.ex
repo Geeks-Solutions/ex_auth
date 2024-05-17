@@ -277,6 +277,14 @@ defmodule ExAuth.AuthAPI do
   )
  end
 
+ def refresh_token(user_id, provider) do
+  GeeksHelpers.endpoint_get_callback(
+    Helpers.endpoint() <>
+      "/api/v1/project/#{Helpers.project_id()}/#{provider}/refresh/#{user_id}",
+      Helpers.headers()
+  )
+ end
+
  @doc """
  Takes an ID as a parameter to return a challenge for signature.
  The nature of the challenge depends on the configuration of the `login_field` on the project
