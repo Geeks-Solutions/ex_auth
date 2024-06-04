@@ -5,38 +5,38 @@ defmodule ExAuth.AuthAPIV2 do
   alias ExAuth.Helpers
   alias ExGeeks.Helpers, as: GeeksHelpers
 
-  def get_users(filter \\ %{}, limit \\ nil, start \\ 0)
+  def get_users(filter \\ %{}, limit \\ nil, start \\ 0, opts \\ [])
 
-  def get_users(filter, limit, _start) when limit in [nil, 0] do
-    users(filter, "")
+  def get_users(filter, limit, _start, opts) when limit in [nil, 0] do
+    users(filter, "", opts)
   end
 
-  def get_users(filter, limit, start) do
+  def get_users(filter, limit, start, opts) do
     if is_nil(start) do
-      users(filter, "")
+      users(filter, "", opts)
     else
       pagination = "limit=#{limit}&start=#{start}"
-      users(filter, pagination)
+      users(filter, pagination, opts)
     end
   end
 
-  def users(filter, pagination) do
+  def users(filter, pagination, opts) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
-        "/api/v2/project/#{Helpers.project_id()}/users?#{pagination}",
+        "/api/v2/project/#{Helpers.project_id(opts[:project_name])}/users?#{pagination}",
       filter,
-      Helpers.headers()
+      Helpers.headers(opts[:project_name])
     )
   end
 
-  def send_verification(user_id, metadata \\ %{}) when not is_nil(user_id) do
+  def send_verification(user_id, metadata \\ %{}, opts \\ []) when not is_nil(user_id) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
-        "/api/v2/project/#{Helpers.project_id()}/user/#{user_id}/resend_verification",
+        "/api/v2/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}/resend_verification",
       %{"metadata" => metadata},
-      Helpers.headers()
+      Helpers.headers(opts[:project_name])
     )
   end
 
-  def send_verification(_ ,_ ), do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
+  def send_verification(_ ,_ , _), do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
 end

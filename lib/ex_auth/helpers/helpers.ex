@@ -14,6 +14,9 @@ defmodule ExAuth.Helpers do
             #{key}: VALUE_HERE "),
           else: opts |> Map.get(:default)
 
+      value when key == :secondary_projects ->
+        Poison.decode!(value)
+
       value ->
         value
     end
@@ -28,7 +31,18 @@ defmodule ExAuth.Helpers do
 
   def headers(nil), do: headers()
 
-  def headers(token) do
+  def headers(project_name) do
+    private_key = Map.get(env(:secondary_projects), project_name)["key"]
+    [
+      {"content-type", "application/json"},
+      {"privatekey", private_key}
+    ]
+  end
+
+  def headers(project_name \\ nil, token \\ nil)
+  def headers(nil, nil), do: headers()
+  def headers(project_name, nil), do: headers(project_name)
+  def headers(_, token) do
     [
       {"content-type", "application/json"},
       {"token", token}
@@ -37,6 +51,14 @@ defmodule ExAuth.Helpers do
 
   def project_id do
     env(:project_id, %{raise: true})
+  end
+
+  def project_id(nil) do
+    project_id()
+  end
+
+  def project_id(project_name) do
+    Map.get(env(:secondary_projects), project_name)["id"]
   end
 
   def private_key do

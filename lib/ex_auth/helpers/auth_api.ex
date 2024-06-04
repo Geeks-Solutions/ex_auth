@@ -13,52 +13,52 @@ defmodule ExAuth.AuthAPI do
     Helpers.cache_delete(:roles)
   end
 
-  def verify_token(token, type \\ "login") do
-    project_id = Helpers.project_id()
+  def verify_token(token, type \\ "login", opts \\ []) do
+    project_id = Helpers.project_id(opts[:project_name])
     body = %{token: token, type: type}
 
     url = Helpers.endpoint() <> "/api/v1/project/#{project_id}/verify_token"
 
-    GeeksHelpers.endpoint_post_callback(url, body, Helpers.headers())
+    GeeksHelpers.endpoint_post_callback(url, body, Helpers.headers(opts[:project_name]))
   end
 
-  def get_user(user_id) do
-    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
+  def get_user(user_id, opts \\ []) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}"
 
-    GeeksHelpers.endpoint_get_callback(url, Helpers.headers())
+    GeeksHelpers.endpoint_get_callback(url, Helpers.headers(opts[:project_name]))
   end
 
   @doc """
   Provided a `token` it will revoke it to avoid further usage
   """
-  def logout(%{token: _} = params) do
-    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/logout"
+  def logout(%{token: _} = params, opts \\ []) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/logout"
 
-    GeeksHelpers.endpoint_post_callback(url, params, Helpers.headers())
+    GeeksHelpers.endpoint_post_callback(url, params, Helpers.headers(opts[:project_name]))
   end
 
-  def delete_user(user_id) do
-    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/delete/#{user_id}"
+  def delete_user(user_id, opts \\ []) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/delete/#{user_id}"
 
-    GeeksHelpers.endpoint_delete_callback(url, Helpers.headers())
+    GeeksHelpers.endpoint_delete_callback(url, Helpers.headers(opts[:project_name]))
   end
 
-  def get_users(filter \\ %{}, limit \\ nil, start \\ 0)
+  def get_users(filter \\ %{}, limit \\ nil, start \\ 0, opts \\ [])
 
-  def get_users(filter, limit, _start) when limit in [nil, 0] do
-    users(filter, "")
+  def get_users(filter, limit, _start, opts) when limit in [nil, 0] do
+    users(filter, "", opts)
   end
 
-  def get_users(filter, limit, start) do
+  def get_users(filter, limit, start, opts) do
     if is_nil(start) do
-      users(filter, "")
+      users(filter, "", opts)
     else
       pagination = "limit=#{limit}&start=#{start}"
-      users(filter, pagination)
+      users(filter, pagination, opts)
     end
   end
 
-  def users(filter, pagination) do
+  def users(filter, pagination, opts) do
     filter =
       filter
       |> Enum.reduce("", fn {key, value}, acc ->
@@ -67,17 +67,18 @@ defmodule ExAuth.AuthAPI do
 
       GeeksHelpers.endpoint_get_callback(
       Helpers.endpoint() <>
-        "/api/v1/project/#{Helpers.project_id()}/users?#{filter}&#{pagination}",
-      Helpers.headers()
+        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/users?#{filter}&#{pagination}",
+      Helpers.headers(opts[:project_name])
     )
   end
 
-  def register(%{email: email} = user) do
+  def register(user, opts \\ [])
+  def register(%{email: email} = user, opts) do
     if Helpers.valid_email?(email) do
       GeeksHelpers.endpoint_post_callback(
-        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/register",
+        Helpers.endpoint(opts[:project_name]) <> "/api/v1/project/#{Helpers.project_id()}/register",
         user,
-        Helpers.headers()
+        Helpers.headers(opts[:project_name])
       )
     else
       %{
@@ -88,25 +89,26 @@ defmodule ExAuth.AuthAPI do
     end
   end
 
-  def register(user) do
+  def register(user, opts) do
     GeeksHelpers.endpoint_post_callback(
-      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/register",
+      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/register",
       user,
-      Helpers.headers()
+      Helpers.headers(opts[:project_name])
     )
   end
 
-  def login(user) do
-    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/login"
+  def login(user, opts \\ []) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/login"
 
-    GeeksHelpers.endpoint_post_callback(url, user, Helpers.headers())
+    GeeksHelpers.endpoint_post_callback(url, user, Helpers.headers(opts[:project_name]))
   end
 
-  def update_private_user(%{email: email} = user, user_id) do
+  def update_private_user(user, user_id, opts \\ [])
+  def update_private_user(%{email: email} = user, user_id, opts) do
     if Helpers.valid_email?(email) do
-      url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/privateuser/#{user_id}"
+      url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/privateuser/#{user_id}"
 
-      GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers())
+      GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
     else
       %{
         "error" => "Invalid Email Format",
@@ -117,17 +119,18 @@ defmodule ExAuth.AuthAPI do
   end
 
   ## not to be exposed for the host project internal use only
-  def update_private_user(user, user_id) do
-    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/privateuser/#{user_id}"
+  def update_private_user(user, user_id, opts) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/privateuser/#{user_id}"
 
-    GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers())
+    GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
   end
 
-  def update_user(%{email: email} = user, user_id) do
+  def update_user(user, user_id, opts \\ [])
+  def update_user(%{email: email} = user, user_id, opts) do
     if Helpers.valid_email?(email) do
-      url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
+      url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}"
 
-      GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers())
+      GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
     else
       %{
         "error" => "Invalid Email Format",
@@ -137,18 +140,19 @@ defmodule ExAuth.AuthAPI do
     end
   end
 
-  def update_user(user, user_id) do
-    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}"
+  def update_user(user, user_id, opts) do
+    url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}"
 
-    GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers())
+    GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
   end
 
-  def reset_password(%{"user" => email} = user) do
+  def reset_password(user, opts \\ [])
+  def reset_password(%{"user" => email} = user, opts) do
     if Helpers.valid_email?(email) do
       GeeksHelpers.endpoint_post_callback(
-        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/reset_password",
+        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/reset_password",
         user,
-        Helpers.headers()
+        Helpers.headers(opts[:project_name])
       )
     else
       %{
@@ -159,11 +163,11 @@ defmodule ExAuth.AuthAPI do
     end
   end
 
-  def reset_password(user) do
+  def reset_password(user, opts) do
     GeeksHelpers.endpoint_post_callback(
-      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/reset_password",
+      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/reset_password",
       user,
-      Helpers.headers()
+      Helpers.headers(opts[:project_name])
     )
   end
 
@@ -172,22 +176,23 @@ defmodule ExAuth.AuthAPI do
   If you enabled caching, the results will be stored locally and you can refresh it by providing the `true` param
   If caching is not enabled, it will run a request to auth everytime this is called
   """
-  def get_project_roles(refresh \\ false) do
-    roles = Helpers.cache_get(:roles)
+  def get_project_roles(refresh \\ false, opts \\ []) do
+    key = String.to_atom("roles_"<>opts[:project_name])
+    roles = Helpers.cache_get(key)
     if is_nil(roles) or refresh do
       %{"data" => roles} = GeeksHelpers.endpoint_get_callback(
-        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/roles",
-        Helpers.headers()
+        Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/roles",
+        Helpers.headers(opts[:project_name])
       )
-      Helpers.cache_set(:roles, roles)
+      Helpers.cache_set(key, roles)
       roles
     else
       roles
     end
   end
 
-  def get_role_id(role_title) do
-    [role_object] = get_project_roles()
+  def get_role_id(role_title, opts \\ []) do
+    [role_object] = get_project_roles(false, opts)
     |> Enum.filter(fn %{"title" => title} -> title == role_title end)
 
     Map.get(role_object, "id")
@@ -199,41 +204,41 @@ defmodule ExAuth.AuthAPI do
   It is strongly advised to enable caching when calling this function
   to avoid multiple requests to the Auth API
   """
-  def get_role_object(role_id) do
-    [role_object] = get_project_roles()
+  def get_role_object(role_id, opts \\ []) do
+    [role_object] = get_project_roles(false, opts)
     |> Enum.filter(fn %{"id" => id} -> id == role_id end)
     role_object
   end
 
-  def verify_password(user_id, password) do
+  def verify_password(user_id, password, opts \\ []) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
-        "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}/verify_password",
+        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}/verify_password",
       %{password: password},
-      Helpers.headers()
+      Helpers.headers(opts[:project_name])
     )
   end
 
-  def send_verification(user_id) do
+  def send_verification(user_id, opts \\ []) do
     GeeksHelpers.endpoint_get_callback(
       Helpers.endpoint() <>
-        "/api/v1/project/#{Helpers.project_id()}/user/#{user_id}/resend_verification",
-      Helpers.headers()
+        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}/resend_verification",
+      Helpers.headers(opts[:project_name])
     )
   end
 
-  def verify_user(user_id) do
+  def verify_user(user_id, opts \\ []) do
     GeeksHelpers.endpoint_put_callback(
-      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id()}/verify_user/#{user_id}",
+      Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/verify_user/#{user_id}",
       %{},
-      Helpers.headers()
+      Helpers.headers(opts[:project_name])
     )
   end
 
-  def login_as_user(user_id) do
+  def login_as_user(user_id, opts \\ []) do
     GeeksHelpers.endpoint_get_callback(
-      "#{Helpers.endpoint()}/api/v1/project/#{Helpers.project_id()}/login/#{user_id}",
-      Helpers.headers()
+      "#{Helpers.endpoint()}/api/v1/project/#{Helpers.project_id(opts[:project_name])}/login/#{user_id}",
+      Helpers.headers(opts[:project_name])
     )
   end
 
@@ -242,8 +247,8 @@ defmodule ExAuth.AuthAPI do
   The provider will then redirect the user to the `redirect_uri` with a code that must be used server side
   to collect the fields data.
  """
- def get_social_connect_link(provider, redirect_uri, scopes \\ nil) do
-  oauth_link([provider: provider, redirect_uri: redirect_uri, scopes: scopes])
+ def get_social_connect_link(provider, redirect_uri, scopes \\ nil, opts \\ []) do
+  oauth_link([provider: provider, redirect_uri: redirect_uri, scopes: scopes], opts)
  end
 
  def oauth_link(params, opts \\ []) do
@@ -263,8 +268,8 @@ defmodule ExAuth.AuthAPI do
    - `login` if a user with the same login field already exists
   In case of a login, the response will also include a user_token
  """
- def social_connect(provider, code, redirect_uri, fields \\ nil) do
-  oauth_token([provider: provider, code: code, redirect_uri: redirect_uri, fields: fields])
+ def social_connect(provider, code, redirect_uri, fields \\ nil, opts \\ []) do
+  oauth_token([provider: provider, code: code, redirect_uri: redirect_uri, fields: fields], opts)
  end
 
  def oauth_token(params, opts \\ []) do
@@ -272,16 +277,16 @@ defmodule ExAuth.AuthAPI do
   fields = if is_nil(params[:fields]), do: "", else: "&fields[]=#{Enum.join(params[:fields], "&fields[]=")}"
   GeeksHelpers.endpoint_get_callback(
     Helpers.endpoint() <>
-      "/api/v1/auth/project/#{Helpers.project_id()}/#{params[:provider]}/callback?code=#{params[:code]}&redirect_uri=#{params[:redirect_uri]}#{fields}",
-      Helpers.headers(opts[:token])
+      "/api/v1/auth/project/#{Helpers.project_id(opts[:project_name])}/#{params[:provider]}/callback?code=#{params[:code]}&redirect_uri=#{params[:redirect_uri]}#{fields}",
+      Helpers.headers(opts[:project_name], opts[:token])
   )
  end
 
- def refresh_token(user_id, provider) do
+ def refresh_token(user_id, provider, opts \\ []) do
   GeeksHelpers.endpoint_get_callback(
     Helpers.endpoint() <>
-      "/api/v1/project/#{Helpers.project_id()}/#{provider}/refresh/#{user_id}",
-      Helpers.headers()
+      "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/#{provider}/refresh/#{user_id}",
+      Helpers.headers(opts[:project_name])
   )
  end
 
@@ -289,12 +294,12 @@ defmodule ExAuth.AuthAPI do
  Takes an ID as a parameter to return a challenge for signature.
  The nature of the challenge depends on the configuration of the `login_field` on the project
  """
- def get_challenge(id) do
+ def get_challenge(id, opts \\ []) do
   GeeksHelpers.endpoint_post_callback(
     Helpers.endpoint() <>
-    "/api/v1/project/#{Helpers.project_id()}/login_challenge",
+    "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/login_challenge",
     id,
-    Helpers.headers()
+    Helpers.headers(opts[:project_name])
    )
  end
 
@@ -303,12 +308,12 @@ defmodule ExAuth.AuthAPI do
  - It will register a new user if the ID is new
  - It will login the user carrying the ID if it exists already
  """
- def connect(connect) do
+ def connect(connect, opts \\ []) do
   GeeksHelpers.endpoint_post_callback(
     Helpers.endpoint() <>
-    "/api/v1/project/#{Helpers.project_id()}/connect",
+    "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/connect",
     connect,
-    Helpers.headers()
+    Helpers.headers(opts[:project_name])
   )
  end
 
@@ -318,21 +323,29 @@ defmodule ExAuth.AuthAPI do
  - (optional) time_start: a timestamp to define the start date for range facets
  - (optional) time_end: a timestamp to define the end date for range facets
  """
- def dashboard(facets) do
+ def dashboard(facets, opts \\ []) do
   GeeksHelpers.endpoint_post_callback(
     Helpers.endpoint() <>
-    "/api/v1/project/#{Helpers.project_id()}/dashboard",
+    "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/dashboard",
     %{"facets" => facets},
-    Helpers.headers()
+    Helpers.headers(opts[:project_name])
   )
  end
 
- def dashboard(facets, time_start, time_end) do
+ def dashboard(facets, time_start, time_end, opts \\ []) do
   GeeksHelpers.endpoint_post_callback(
     Helpers.endpoint() <>
-    "/api/v1/project/#{Helpers.project_id()}/dashboard",
+    "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/dashboard",
     %{"facets" => facets, "timeframe" => %{"start" => time_start, "end" => time_end}},
-    Helpers.headers()
+    Helpers.headers(opts[:project_name])
+  )
+ end
+
+ def get_project(opts \\ []) do
+  GeeksHelpers.endpoint_get_callback(
+    Helpers.endpoint() <>
+      "/api/v1/project/#{Helpers.project_id(opts[:project_name])}",
+      Helpers.headers(opts[:project_name])
   )
  end
 end
