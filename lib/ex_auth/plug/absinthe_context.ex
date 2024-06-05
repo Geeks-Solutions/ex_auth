@@ -41,7 +41,7 @@ defmodule ExAuth.Plug.AbsintheContext do
 
     defp user_process(conn, [type]) do
       with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-           auth_project <- get_req_header(conn, "auth_project"),
+           auth_project <- get_req_header(conn, "auth-project"),
            {:ok, current_user} <- authorize(token, type, auth_project) do
         %{current_user: current_user, token: token, token_type: type} |> add_fields(conn)
       else
@@ -79,7 +79,7 @@ defmodule ExAuth.Plug.AbsintheContext do
         end
 
       auth_project =
-        case get_req_header(conn, "auth_project") do
+        case get_req_header(conn, "auth-project") do
           [] ->
             nil
 
