@@ -180,6 +180,7 @@ defmodule ExAuth.AuthAPI do
     key = if is_nil(opts[:project_name]),
       do: String.to_atom("roles"),
       else: String.to_atom("roles_"<>opts[:project_name])
+
     roles = Helpers.cache_get(key)
     if is_nil(roles) or refresh do
       %{"data" => roles} = GeeksHelpers.endpoint_get_callback(

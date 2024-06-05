@@ -41,7 +41,8 @@ defmodule ExAuth.Plug.AbsintheContext do
 
     defp user_process(conn, [type]) do
       with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-           {:ok, current_user} <- authorize(token, type) do
+           auth_project <- get_req_header(conn, "auth_project"),
+           {:ok, current_user} <- authorize(token, type, auth_project) do
         %{current_user: current_user, token: token, token_type: type} |> add_fields(conn)
       else
         {:error, "invalid authorization token"} ->
@@ -77,10 +78,20 @@ defmodule ExAuth.Plug.AbsintheContext do
             false
         end
 
+      auth_project =
+        case get_req_header(conn, "auth_project") do
+          [] ->
+            nil
+
+          [project] ->
+            project
+        end
+
       new_current_user =
         return_add_fields(main_data.current_user, %{
           role: roles,
-          bo: bo
+          bo: bo,
+          auth_project_name: auth_project
         })
 
       main_data
@@ -104,7 +115,8 @@ defmodule ExAuth.Plug.AbsintheContext do
 
     defp return_add_fields(current_user, %{
            role: role,
-           bo: bo
+           bo: bo,
+           auth_project_name: project_name
          }) do
       map =
         case current_user do
@@ -118,10 +130,16 @@ defmodule ExAuth.Plug.AbsintheContext do
       map
       |> Map.put(:roles, role)
       |> Map.put(:bo, bo)
+      |> Map.put(:auth_project_name, project_name)
     end
 
-    defp authorize(token, type \\ "login") do
-      case AuthAPI.verify_token(token, type) do
+    defp authorize(token, type \\ "login", project_name)
+    defp authorize(token, type, []) do
+      authorize(token, type, [nil])
+    end
+
+    defp authorize(token, type, [project_name]) do
+      case AuthAPI.verify_token(token, type, [project_name: project_name]) do
         %{
           "data" => %{
             "token" => %{"token" => _token, "type" => ^type},
