@@ -14,6 +14,9 @@ defmodule ExAuth.Plug.AbsintheContext do
     def init(opts), do: opts
 
     def call(conn, _) do
+      # Log request headers
+      Logger.debug("ex_auth Request Headers: #{inspect(conn.req_headers)}")
+
       with {:absinthe, {:module, _}} <- {:absinthe, Code.ensure_compiled(Absinthe.Plug)},
       %{current_user: _} = context <- build_user_context(conn) do
           apply(Absinthe.Plug, :put_options, [conn, %{context: context}])
@@ -41,7 +44,7 @@ defmodule ExAuth.Plug.AbsintheContext do
 
     defp user_process(conn, [type]) do
       with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-           auth_project <- get_req_header(conn, "Auth-Project"),
+           auth_project <- get_req_header(conn, "auth-project"),
            {:ok, current_user} <- authorize(token, type, auth_project) do
         %{current_user: current_user, token: token, token_type: type} |> add_fields(conn)
       else
@@ -79,7 +82,7 @@ defmodule ExAuth.Plug.AbsintheContext do
         end
 
       auth_project =
-        case get_req_header(conn, "Auth-Project") do
+        case get_req_header(conn, "auth-project") do
           [] ->
             nil
 
