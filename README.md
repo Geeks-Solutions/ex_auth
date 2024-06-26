@@ -26,6 +26,12 @@ ExAuth is a library that serves to integrate your project the fastest way possib
  resend_verification_action: %{module: TestingHelpers, function: :action}
  ```
  By specifying the module and function (arity 1) you are telling `ex_auth` what is the action that your project would like to do when a reset password is requested for a user. This is the function that will be called.  i.e. some projects send an email.
+
+ This leverages the websocket communication setup in Auth that you can also use for other websocket events:
+ - reset_password
+ - resend_verification
+ - new_user
+ You just need to add configuration for the event you would like to execute on in the form of `{event_name}_action`
 7. If your project uses absinthe this library provides the `ExAuth.Plug.AbsintheContext` plug to use in your router pipeline to automatically populate your context with the user information when providing a valid auth token
 8. You can also enable caching for certain calls to limit the API calls, supported resources are:
  - roles

@@ -92,6 +92,24 @@ defmodule ExAuth.AuthClient do
     {:ok, state}
   end
 
+  def handle_message(
+        topic,
+        event,
+        payload,
+        _transport,
+        state
+      ) do
+    Logger.debug("ex_auth: message on topic #{topic} - #{event} #{inspect(payload)}")
+
+    action = event <> "_action"
+    |> String.to_atom()
+    |> Helpers.env()
+
+    unless is_nil(action), do: apply(action[:module], action[:function], [payload])
+
+    {:ok, state}
+  end
+
   def handle_message(topic, event, payload, _transport, state) do
     Logger.debug("ex_auth: message on topic #{topic} - #{event} #{inspect(payload)}")
 
