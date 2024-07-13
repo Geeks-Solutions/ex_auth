@@ -78,7 +78,6 @@ defmodule ExAuth.AuthAPI do
   end
 
   def register(user, opts \\ [])
-
   def register(%{email: email} = user, opts) do
     if Helpers.valid_email?(email) do
       GeeksHelpers.endpoint_post_callback(
@@ -294,8 +293,8 @@ defmodule ExAuth.AuthAPI do
 
     GeeksHelpers.endpoint_get_callback(
       Helpers.endpoint() <>
-        "/api/v1/project/#{Helpers.project_id()}/auth/#{params[:provider]}?redirect_uri=#{params[:redirect_uri]}#{scopes}",
-      Helpers.headers(opts[:token])
+        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/auth/#{params[:provider]}?redirect_uri=#{params[:redirect_uri]}#{scopes}",
+      Helpers.headers(opts[:project_name], opts[:token])
     )
   end
 
