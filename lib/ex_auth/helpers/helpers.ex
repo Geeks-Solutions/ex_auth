@@ -98,4 +98,108 @@ defmodule ExAuth.Helpers do
     do: ExGeeks.EtsCaching.delete(:ex_auth, key),
     else: nil
   end
+
+  # Return the current user context based on the authorization header
+  def build_user_context_socket(params) do
+    if is_nil(Map.get(params, "Authorization", nil)) do
+      default_value_user(params) |> add_fields(params)
+    else
+      user_process(
+        params,
+        Map.get(params, "token-type", nil),
+        Map.get(params, "auth-project", nil)
+      )
+    end
+  end
+
+  defp user_process(params, nil, auth_project), do: user_process(params, "login", auth_project)
+
+  defp user_process(params, type, auth_project) do
+    with "Bearer " <> token when is_binary(token) <- Map.get(params, "Authorization"),
+         {:ok, current_user} <- authorize(token, type, auth_project) do
+      %{current_user: current_user, token: token, token_type: type} |> add_fields(params)
+    else
+      {:error, "invalid Authorization token"} ->
+        {:error, "invalid Authorization token"}
+
+      _ ->
+        default_value_user(params) |> add_fields(params)
+    end
+  end
+
+  defp default_value_user(%{
+         private: %{absinthe: %{context: %{current_user: current_user}}}
+       }) do
+    %{current_user: current_user}
+  end
+
+  defp default_value_user(_), do: %{current_user: nil}
+
+  defp add_fields(main_data, params) do
+    roles = get_roles(main_data)
+
+    new_current_user =
+      return_add_fields(main_data.current_user, %{
+        role: roles
+      })
+
+    main_data
+    |> Map.put(:current_user, new_current_user)
+  end
+
+  defp get_roles(main_data) do
+    case main_data do
+      %{current_user: %{user: %{info: info}}, token: _token} ->
+        roles =
+          Enum.reduce(info.roles_object, [], fn %{title: title} = _role, acc ->
+            List.insert_at(acc, -1, title)
+          end)
+
+        roles
+
+      _ ->
+        nil
+    end
+  end
+
+  defp return_add_fields(current_user, %{
+         role: role
+       }) do
+    map =
+      case current_user do
+        nil ->
+          %{}
+
+        _ ->
+          current_user
+      end
+
+    map
+    |> Map.put(:roles, role)
+  end
+
+  defp authorize(token, type, auth_project) do
+    case AuthAPI.verify_token(token, type, project_name: auth_project) do
+      %{
+        "data" => %{
+          "token" => %{"token" => _token, "type" => ^type},
+          "user" => user
+        }
+      } ->
+        {:ok,
+         %{
+           user: %{
+             info: user |> GeeksHelpers.atomize_keys()
+           }
+         }}
+
+      %{"message" => err, "status" => "failed"} ->
+        Logger.error("GQL Context: #{err}")
+        {:error, "ex_auth: GQL Context - #{err}"}
+
+      %{"error" => _} ->
+        Logger.error("ex_auth: GQL Context - invalid authorization token")
+        {:error, "invalid authorization token"}
+    end
+  end
 end

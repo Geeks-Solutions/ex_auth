@@ -31,6 +31,7 @@ ExAuth is a library that serves to integrate your project the fastest way possib
  - reset_password
  - resend_verification
  - new_user
+ - user_edit
  You just need to add configuration for the event you would like to execute on in the form of `{event_name}_action`
 7. If your project uses absinthe this library provides the `ExAuth.Plug.AbsintheContext` plug to use in your router pipeline to automatically populate your context with the user information when providing a valid auth token
 8. You can also enable caching for certain calls to limit the API calls, supported resources are:
