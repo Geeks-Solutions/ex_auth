@@ -2,6 +2,10 @@ defmodule ExAuth.Helpers do
   @moduledoc """
   Helper functions for the library
   """
+  alias ExAuth.AuthAPI
+  alias ExGeeks.Helpers, as: GeeksHelpers
+  require Logger
+
   @email_regex ~r/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
   def env(key, opts \\ %{default: nil, raise: false}) do
     Application.get_env(:ex_auth, key)
@@ -101,7 +105,7 @@ defmodule ExAuth.Helpers do
 
   # Return the current user context based on the authorization header
   def build_user_context_socket(params) do
-    if is_nil(Map.get(params, "Authorization", nil)) do
+    if is_nil(Map.get(params, "authorization", nil)) do
       default_value_user(params) |> add_fields(params)
     else
       user_process(
@@ -115,12 +119,12 @@ defmodule ExAuth.Helpers do
   defp user_process(params, nil, auth_project), do: user_process(params, "login", auth_project)
 
   defp user_process(params, type, auth_project) do
-    with "Bearer " <> token when is_binary(token) <- Map.get(params, "Authorization"),
+    with "Bearer " <> token when is_binary(token) <- Map.get(params, "authorization"),
          {:ok, current_user} <- authorize(token, type, auth_project) do
       %{current_user: current_user, token: token, token_type: type} |> add_fields(params)
     else
-      {:error, "invalid Authorization token"} ->
-        {:error, "invalid Authorization token"}
+      {:error, "invalid authorization token"} ->
+        {:error, "invalid authorization token"}
 
       _ ->
         default_value_user(params) |> add_fields(params)
@@ -135,7 +139,7 @@ defmodule ExAuth.Helpers do
 
   defp default_value_user(_), do: %{current_user: nil}
 
-  defp add_fields(main_data, params) do
+  defp add_fields(main_data, _params) do
     roles = get_roles(main_data)
 
     new_current_user =
