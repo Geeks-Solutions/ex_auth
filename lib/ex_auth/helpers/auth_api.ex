@@ -78,6 +78,7 @@ defmodule ExAuth.AuthAPI do
   end
 
   def register(user, opts \\ [])
+
   def register(%{email: email} = user, opts) do
     if Helpers.valid_email?(email) do
       GeeksHelpers.endpoint_post_callback(
@@ -136,15 +137,15 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
   end
 
-  def update_user(user, user_id, opts \\ [])
+  def update_user(user, user_token, opts \\ [])
 
-  def update_user(%{email: email} = user, user_id, opts) do
+  def update_user(%{email: email} = user, user_token, opts) do
     if Helpers.valid_email?(email) do
       url =
         Helpers.endpoint() <>
-          "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}"
+          "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user"
 
-      GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
+      GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(nil, user_token))
     else
       %{
         "error" => "Invalid Email Format",
@@ -154,12 +155,12 @@ defmodule ExAuth.AuthAPI do
     end
   end
 
-  def update_user(user, user_id, opts) do
+  def update_user(user, user_token, opts) do
     url =
       Helpers.endpoint() <>
-        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}"
+        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/user/"
 
-    GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
+    GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(nil, user_token))
   end
 
   def reset_password(user, opts \\ [])

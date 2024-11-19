@@ -110,12 +110,6 @@ defmodule ExAuth.AuthClient do
     {:ok, state}
   end
 
-  def handle_message(topic, event, payload, _transport, state) do
-    Logger.debug("ex_auth: message on topic #{topic} - #{event} #{inspect(payload)}")
-
-    {:ok, state}
-  end
-
   def handle_call(request, from, _transport, state) do
     Logger.debug("ex_auth: message from #{inspect(from)} - #{inspect(request)}")
 
