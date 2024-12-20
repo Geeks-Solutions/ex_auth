@@ -38,7 +38,7 @@ defmodule ExAuth.AuthClient do
 
   def handle_disconnected(reason, state) do
     Logger.error("ex_auth: disconnected - #{inspect(reason)}")
-    Process.send_after(self(), :connect, :timer.seconds(1))
+    if Helpers.ws_reconnect, do: Process.send_after(self(), :connect, :timer.seconds(1))
     {:ok, state}
   end
 

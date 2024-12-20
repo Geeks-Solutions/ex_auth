@@ -77,6 +77,10 @@ defmodule ExAuth.Helpers do
     env(:ws_endpoint, %{raise: false, default: "wss://auth.geeks.solutions/socket/websocket"})
   end
 
+  def ws_reconnect do
+    env(:ws_reconnect, %{raise: false, default: true})
+  end
+
   # This version is required in case a user wants to empty his email when this is not
   # a login field
   def valid_email?(email) when is_nil(email) or email == "", do: true
