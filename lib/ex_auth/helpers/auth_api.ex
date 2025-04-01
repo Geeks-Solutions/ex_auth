@@ -30,6 +30,14 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_get_callback(url, Helpers.headers(opts[:project_name]))
   end
 
+  def get_public_user(user_id, opts \\ []) do
+    url =
+      Helpers.endpoint() <>
+        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/public_user/#{user_id}"
+
+    GeeksHelpers.endpoint_get_callback(url, Helpers.headers(opts[:project_name]))
+  end
+
   @doc """
   Provided a `token` it will revoke it to avoid further usage
   """
