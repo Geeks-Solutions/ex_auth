@@ -19,7 +19,8 @@ defmodule ExAuth.AuthAPI do
 
     url = Helpers.endpoint() <> "/api/v1/project/#{project_id}/verify_token"
 
-    GeeksHelpers.endpoint_post_callback(url, body, Helpers.headers(opts[:project_name]))
+    # When verifying a token, the private key is not necessary (and is slowing down response time)
+    GeeksHelpers.endpoint_post_callback(url, body, Helpers.headers(nil, "ignored"))
   end
 
   def get_user(user_id, opts \\ []) do
