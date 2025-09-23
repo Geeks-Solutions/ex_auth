@@ -62,7 +62,7 @@ defmodule ExAuth.MixProject do
       # {:ex_geeks, path: "/Users/julien/Documents/Repos/Gitlab/Geeks/Libraries/ex_geeks"}
       {:ex_geeks,
         git: "https://github.com/Geeks-Solutions/ex_geeks",
-        ref: "2b65449197e7a84f582c27b8401f365295ab21f1"}
+        ref: "03a91bbdfedb7754e8709125e0a31fa0cb54512d"}
     ]
   end
 
