@@ -38,5 +38,5 @@ defmodule ExAuth.AuthAPIV2 do
     )
   end
 
-  def send_verification(_ ,_ , _), do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
+  def send_verification(_, _, _), do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
 end

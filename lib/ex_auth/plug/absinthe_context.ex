@@ -19,7 +19,7 @@ defmodule ExAuth.Plug.AbsintheContext do
 
       with {:absinthe, {:module, _}} <- {:absinthe, Code.ensure_compiled(Absinthe.Plug)},
       %{current_user: _} = context <- build_user_context(conn) do
-          apply(Absinthe.Plug, :put_options, [conn, %{context: context}])
+          Absinthe.Plug.put_options(conn, %{context: context})
 
       else
         {:absinthe, {:error, _}} ->
@@ -27,7 +27,7 @@ defmodule ExAuth.Plug.AbsintheContext do
           conn
 
         %{error: _} = context ->
-          apply(Absinthe.Plug, :put_options, [conn, %{context: context}])
+          Absinthe.Plug.put_options(conn, %{context: context})
       end
     end
 
