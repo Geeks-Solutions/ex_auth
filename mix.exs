@@ -41,13 +41,8 @@ defmodule ExAuth.MixProject do
   defp deps do
     [
       {:phoenix, ">= 1.5.0"},
-      {:phoenix_view, "~> 2.0"},
-      {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"},
-      {:bcrypt_elixir, "~> 2.0"},
-      {:httpoison, "~> 1.8"},
-      {:poison, ">= 4.0.1"},
+      {:plug_cowboy, "~> 2.0", only: :test},
       {:phoenix_gen_socket_client,
        git: "https://github.com/J0/phoenix_gen_socket_client.git",
        ref: "9d59e142ff2f51c7a150f4f54c8ae6c3a4ac76df"},
@@ -56,8 +51,8 @@ defmodule ExAuth.MixProject do
       {:excoveralls, "~> 0.10", only: :test},
       # {:ex_geeks, path: "/Users/julien/Documents/Repos/Gitlab/Geeks/Libraries/ex_geeks"}
       {:ex_geeks,
-        git: "https://github.com/Geeks-Solutions/ex_geeks",
-        ref: "e0e52754f5cce87eb4775b619969514b8eb861e7"}
+       git: "https://github.com/Geeks-Solutions/ex_geeks",
+       ref: "9dfc2b93b2be6ac577a6643b230cb354abed7b1d"}
     ]
   end
 

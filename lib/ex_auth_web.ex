@@ -23,7 +23,6 @@ defmodule ExAuthWeb do
         layouts: []
 
       import Plug.Conn
-      import ExAuthWeb.Gettext
       alias ExAuthWeb.Router.Helpers, as: Routes
     end
   end
@@ -40,7 +39,6 @@ defmodule ExAuthWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import ExAuthWeb.Gettext
     end
   end
 

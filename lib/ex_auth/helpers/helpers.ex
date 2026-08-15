@@ -19,7 +19,7 @@ defmodule ExAuth.Helpers do
           else: opts |> Map.get(:default)
 
       value when key == :secondary_projects ->
-        Poison.decode!(value)
+        Jason.decode!(value)
 
       value ->
         value
