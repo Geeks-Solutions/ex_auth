@@ -12,13 +12,9 @@ jobs:
     steps:
     - name: Update apt
       run: sudo apt-get update
-    - name: Install ImageMagick
-      run: sudo apt install imagemagick
-    - name: Install Ffmpeg
-      run: sudo apt install ffmpeg
     - uses: actions/checkout@v4
     - name: Set up Elixir
-      uses: erlef/setup-elixir@885971a72ed1f9240973bd92ab57af8c1aa68f24
+      uses: erlef/setup-beam@v1
       with:
         elixir-version: '1.10.3' # Define the elixir version [required]
         otp-version: '22.3' # Define the OTP version [required]
