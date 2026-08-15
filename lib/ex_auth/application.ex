@@ -4,6 +4,7 @@ defmodule ExAuth.Application do
   @moduledoc false
 
   use Application
+  alias ExAuth.Helpers
 
   def start(_type, _args) do
     # Application.get_all_env(:ex_auth) |> IO.inspect()
@@ -23,14 +24,18 @@ defmodule ExAuth.Application do
     #   "https://users-credentials-saas.k8s-dev.geeks.solutions"
     # )
 
-    children = [
-      %{
-        id: ExAuth.AuthClient,
-        start: {ExAuth.AuthClient, :start_link, []}
-      }
-      # Start a worker by calling: ExAuth.Worker.start_link(arg)
-      # {ExAuth.Worker, arg}
-    ]
+    children =
+      [
+        if Helpers.websocket() do
+          %{
+            id: ExAuth.AuthClient,
+            start: {ExAuth.AuthClient, :start_link, []}
+          }
+        end
+        # Start a worker by calling: ExAuth.Worker.start_link(arg)
+        # {ExAuth.Worker, arg}
+      ]
+      |> Enum.reject(&is_nil/1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

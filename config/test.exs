@@ -9,6 +9,7 @@ config :ex_auth, ExAuthWeb.Endpoint,
 config :ex_auth,
   endpoint: "http://localhost:4002/mock/auth",
   ws_endpoint: "ws://localhost:5530",
+  websocket: false,
   project_id: "1",
   private_key: "private_key"
 

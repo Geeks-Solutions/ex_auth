@@ -12,6 +12,7 @@ ExAuth is a library that serves to integrate your project the fastest way possib
  private_key: "your_private_key",
  project_id: "your_project_id",
  endpoint: "https://auth.geeks.solutions", ## endpoint can point to the test site or to the live site.
+ websocket: true, ## set to false to disable websocket supervision.
  ws_endpoint: "ws://auth.geeks.solutions/socket/websocket"
  ```
 6. Now in order to use the reset password feature, you need to add the following:
@@ -46,6 +47,6 @@ ExAuth is a library that serves to integrate your project the fastest way possib
 9. You can also enable caching for certain calls to limit the API calls, supported resources are:
  - roles
 To enable caching simply set your ExGeeks ETS Caching process in your app and then set the `:ex_auth` cache table in your :ex_geeks config finally enable caching by setting the `cache` config to true in your :ex_auth config
-10. testing: if you want to avoid reconnection tentative to the websocket when running test, set the `ws_reconnect` conf. to false in your testing environment
+10. testing: if you want to avoid starting the websocket client when running tests, set the `websocket` conf. to false in your testing environment. `websocket` defaults to true. You can also set `ws_reconnect` to false if you only want to avoid reconnection attempts after the client has started.
 
 And that's it, you project now have an up and running users management system!

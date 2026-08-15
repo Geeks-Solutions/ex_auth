@@ -37,6 +37,7 @@ defmodule ExAuth.Helpers do
 
   def headers(project_name) do
     private_key = Map.get(env(:secondary_projects), project_name)["key"]
+
     [
       {"content-type", "application/json"},
       {"privatekey", private_key}
@@ -46,6 +47,7 @@ defmodule ExAuth.Helpers do
   def headers(project_name \\ nil, token \\ nil)
   def headers(nil, nil), do: headers()
   def headers(project_name, nil) when is_binary(project_name), do: headers(project_name)
+
   def headers(_, token) do
     [
       {"content-type", "application/json"},
@@ -77,6 +79,10 @@ defmodule ExAuth.Helpers do
     env(:ws_endpoint, %{raise: false, default: "wss://auth.geeks.solutions/socket/websocket"})
   end
 
+  def websocket do
+    env(:websocket, %{raise: false, default: true})
+  end
+
   def ws_reconnect do
     env(:ws_reconnect, %{raise: false, default: true})
   end
@@ -91,20 +97,20 @@ defmodule ExAuth.Helpers do
 
   def cache_get(key) do
     if env(:cache, %{raise: false, default: false}),
-    do: ExGeeks.EtsCaching.get(:ex_auth, key),
-    else: nil
+      do: ExGeeks.EtsCaching.get(:ex_auth, key),
+      else: nil
   end
 
   def cache_set(key, value) do
     if env(:cache, %{raise: false, default: false}),
-    do: ExGeeks.EtsCaching.set(:ex_auth, key, value),
-    else: nil
+      do: ExGeeks.EtsCaching.set(:ex_auth, key, value),
+      else: nil
   end
 
   def cache_delete(key) do
     if env(:cache, %{raise: false, default: false}),
-    do: ExGeeks.EtsCaching.delete(:ex_auth, key),
-    else: nil
+      do: ExGeeks.EtsCaching.delete(:ex_auth, key),
+      else: nil
   end
 
   # Return the current user context based on the authorization header
