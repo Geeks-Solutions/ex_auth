@@ -24,12 +24,6 @@ defmodule ExAuth.Application do
     # )
 
     children = [
-      # Start the Telemetry supervisor
-      ExAuthWeb.Telemetry,
-      # Start the PubSub system
-      {Phoenix.PubSub, name: ExAuth.PubSub},
-      # Start the Endpoint (http/https)
-      ExAuthWeb.Endpoint,
       %{
         id: ExAuth.AuthClient,
         start: {ExAuth.AuthClient, :start_link, []}
@@ -44,10 +38,5 @@ defmodule ExAuth.Application do
     Supervisor.start_link(children, opts)
   end
 
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
-  def config_change(changed, _new, removed) do
-    ExAuthWeb.Endpoint.config_change(changed, removed)
-    :ok
-  end
+  def config_change(_changed, _new, _removed), do: :ok
 end

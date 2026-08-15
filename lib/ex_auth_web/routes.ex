@@ -1,9 +1,13 @@
 defmodule ExAuthWeb.Routes do
   @moduledoc """
-  ExAuth.Routes must be used in your phoenix routes as follows:
+  ExAuthWeb.Routes can be used in a host Phoenix router as follows:
 
   ```elixir
-  use Media.Routes, scope: "/", pipe_through: [:browser, :authenticate]
+  scope "/" do
+    pipe_through [:api]
+
+    use ExAuthWeb.Routes, scope: "/ex_auth"
+  end
   ```
 
   `:scope` defaults to `"/ex_auth"`
@@ -29,14 +33,6 @@ defmodule ExAuthWeb.Routes do
     api_pipes = [:ex_auth_api] ++ custom_pipes
 
     quote do
-      pipeline :ex_auth_browser do
-        plug(:accepts, ["html", "json"])
-        plug(:fetch_session)
-        plug(:fetch_flash)
-        plug(:protect_from_forgery)
-        plug(:put_secure_browser_headers)
-      end
-
       pipeline :ex_auth_api do
         plug(:accepts, ["json"])
       end

@@ -34,9 +34,18 @@ ExAuth is a library that serves to integrate your project the fastest way possib
  - `user_edit`
  You just need to add configuration for the event you would like to execute on in the form of `{event_name}_action`
 7. If your project uses absinthe this library provides the `ExAuth.Plug.AbsintheContext` plug to use in your router pipeline to automatically populate your context with the user information when providing a valid auth token
-8. You can also enable caching for certain calls to limit the API calls, supported resources are:
+8. To mount ex_auth's Phoenix routes in your host app, use `ExAuthWeb.Routes` in your router:
+ ```elixir
+ scope "/" do
+   pipe_through [:api]
+
+   use ExAuthWeb.Routes, scope: "/ex_auth"
+ end
+ ```
+ `:scope` defaults to `"/ex_auth"`. You can also pass `pipe_through: [...]` to append custom host pipelines after ex_auth's JSON API pipeline.
+9. You can also enable caching for certain calls to limit the API calls, supported resources are:
  - roles
 To enable caching simply set your ExGeeks ETS Caching process in your app and then set the `:ex_auth` cache table in your :ex_geeks config finally enable caching by setting the `cache` config to true in your :ex_auth config
-9. testing: if you want to avoid reconnection tentative to the websocket when running test, set the `ws_reconnect` conf. to false in your testing environment
+10. testing: if you want to avoid reconnection tentative to the websocket when running test, set the `ws_reconnect` conf. to false in your testing environment
 
 And that's it, you project now have an up and running users management system!

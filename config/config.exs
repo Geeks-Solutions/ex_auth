@@ -5,15 +5,14 @@
 # is restricted to this project.
 
 # General application configuration
-use Mix.Config
+import Config
 
 # Configures the endpoint
 config :ex_auth, ExAuthWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "XCgU0FfGU0iRYa+osyBQGnp5+yWW1nblmmQRggSZmAICvyjwNCg7si0RMde/Q1en",
-  render_errors: [view: ExAuthWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: ExAuth.PubSub,
-  live_view: [signing_salt: "NiiZs5Ru"]
+  render_errors: [view: ExAuthWeb.ErrorView, accepts: ~w(json), layout: false],
+  pubsub_server: ExAuth.PubSub
 
 # Configures Elixir's Logger
 config :logger, :console,

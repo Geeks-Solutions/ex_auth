@@ -51,37 +51,29 @@ defmodule ExAuthWeb.UserController do
     do:
       conn
       |> put_status(400)
-      |> put_view(ExAuthWeb.ErrorView)
-      |> render("error.json", error: error)
+      |> json(%{message: error})
 
   def format_response(resp, conn) do
     case resp do
       %{
         "data" => data
       } ->
-        conn
-        |> render(
-          "data.json",
-          data: data
-        )
+        json(conn, data)
 
       %{"status" => "failed"} = response ->
         conn
         |> put_status(400)
-        |> put_view(ExAuthWeb.ErrorView)
-        |> render("error.json", error: response)
+        |> json(response)
 
       error when is_binary(error) ->
         conn
         |> put_status(400)
-        |> put_view(ExAuthWeb.ErrorView)
-        |> render("error.json", error: error)
+        |> json(%{message: error})
 
       error ->
         conn
         |> put_status(400)
-        |> put_view(ExAuthWeb.ErrorView)
-        |> render("error.json", error: "#{inspect(error)}")
+        |> json(%{message: "#{inspect(error)}"})
     end
   end
 end

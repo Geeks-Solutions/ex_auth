@@ -41,12 +41,7 @@ defmodule ExAuth.MixProject do
   defp deps do
     [
       {:phoenix, ">= 1.5.0"},
-      {:phoenix_html, ">= 2.11.0", optional: true},
-      {:phoenix_html_helpers, "~> 1.0", optional: true},
       {:phoenix_view, "~> 2.0"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:telemetry_metrics, "~> 0.4"},
-      {:telemetry_poller, ">= 0.4.0"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},

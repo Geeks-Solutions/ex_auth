@@ -31,6 +31,13 @@ defmodule ExAuthWeb.ConnCase do
     end
   end
 
+  setup_all do
+    case ExAuthWeb.Endpoint.start_link() do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
+  end
+
   setup _tags do
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
