@@ -44,7 +44,7 @@ defmodule ExAuth.Helpers do
     ]
   end
 
-  def headers(project_name \\ nil, token \\ nil)
+  def headers(project_name, token)
   def headers(nil, nil), do: headers()
   def headers(project_name, nil) when is_binary(project_name), do: headers(project_name)
 

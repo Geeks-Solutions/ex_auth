@@ -1,10 +1,44 @@
 defmodule ExAuth.AuthAPIV2 do
   @moduledoc """
-  This module is responsible to abstract the calls to AUTH server
+  Client helpers for Auth backend API v2 endpoints supported by ExAuth.
+
+  Functions in this module build requests for the configured Auth project and
+  return the decoded JSON response produced by `ExGeeks.Helpers`.
+
+  Pass `project_name: name` in `opts` to target a configured secondary project;
+  otherwise the default `:project_id` and `:private_key` configuration is used.
   """
+
   alias ExAuth.Helpers
   alias ExGeeks.Helpers, as: GeeksHelpers
 
+  @type json ::
+          nil
+          | boolean()
+          | number()
+          | String.t()
+          | [json()]
+          | %{optional(String.t() | atom()) => json()}
+  @type json_map :: %{optional(String.t() | atom()) => json()}
+  @type opts :: keyword(String.t())
+  @type user_id :: String.t()
+  @type user :: %{optional(String.t()) => json()}
+  @type message_response :: %{optional(String.t()) => json()}
+  @type error_response :: %{optional(String.t()) => json()}
+  @type api_response(data) ::
+          %{optional(String.t()) => data | json()}
+          | error_response()
+
+  @type users_response :: api_response(%{optional(String.t()) => [user()] | json()})
+
+  @doc """
+  Retrieves project users as a project admin using the v2 search endpoint.
+
+  Calls `POST /api/v2/project/{project_id}/users` with the filter in the request
+  body and optional `limit`/`start` pagination in the query string.
+  """
+  @spec get_users(json_map(), nil | non_neg_integer(), nil | non_neg_integer(), opts()) ::
+          users_response()
   def get_users(filter \\ %{}, limit \\ nil, start \\ 0, opts \\ [])
 
   def get_users(filter, limit, _start, opts) when limit in [nil, 0] do
@@ -20,6 +54,13 @@ defmodule ExAuth.AuthAPIV2 do
     end
   end
 
+  @doc """
+  Internal request helper for v2 user search.
+
+  Calls `POST /api/v2/project/{project_id}/users` using the already-built
+  pagination query string.
+  """
+  @spec users(json_map(), String.t(), opts()) :: users_response()
   def users(filter, pagination, opts) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
@@ -29,7 +70,17 @@ defmodule ExAuth.AuthAPIV2 do
     )
   end
 
-  def send_verification(user_id, metadata \\ %{}, opts \\ []) when not is_nil(user_id) do
+  @doc """
+  Requests a verification token for a user with optional metadata.
+
+  Calls `POST /api/v2/project/{project_id}/user/{user_id}/resend_verification`
+  and sends `%{"metadata" => metadata}` as the request body.
+  """
+  @spec send_verification(nil | user_id(), json_map(), opts()) ::
+          api_response(message_response()) | json_map()
+  def send_verification(user_id, metadata \\ %{}, opts \\ [])
+
+  def send_verification(user_id, metadata, opts) when not is_nil(user_id) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
         "/api/v2/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}/resend_verification",
@@ -38,5 +89,6 @@ defmodule ExAuth.AuthAPIV2 do
     )
   end
 
-  def send_verification(_, _, _), do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
+  def send_verification(_, _, _),
+    do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
 end
