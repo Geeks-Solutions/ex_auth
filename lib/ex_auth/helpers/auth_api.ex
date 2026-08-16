@@ -1,18 +1,80 @@
 defmodule ExAuth.AuthAPI do
   @moduledoc """
-  This module is responsible to abstract the calls to AUTH server
+  Client helpers for Auth backend API v1.
+
+  Functions in this module build requests for the configured Auth project and
+  return the decoded JSON response produced by `ExGeeks.Helpers`.
+
+  Pass `project_name: name` in `opts` to target a configured secondary project;
+  otherwise the default `:project_id` and `:private_key` configuration is used.
   """
+
   alias ExAuth.Helpers
   alias ExGeeks.Helpers, as: GeeksHelpers
 
+  @type json ::
+          nil
+          | boolean()
+          | number()
+          | String.t()
+          | [json()]
+          | %{optional(String.t() | atom()) => json()}
+  @type json_map :: %{optional(String.t() | atom()) => json()}
+  @type opts :: keyword(String.t())
+  @type user_id :: String.t()
+  @type token :: String.t()
+  @type token_type :: String.t()
+  @type provider :: String.t()
+  @type role :: %{"id" => String.t(), "title" => String.t(), optional(String.t()) => json()}
+  @type user :: %{"user_id" => String.t(), optional(String.t()) => json()}
+  @type project :: %{optional(String.t()) => json()}
+  @type auth_token :: %{
+          "type" => String.t(),
+          "token" => String.t(),
+          optional(String.t()) => json()
+        }
+  @type message_response :: %{"message" => String.t(), optional(String.t()) => json()}
+  @type error_response :: %{"message" => String.t(), optional(String.t()) => json()}
+  @type api_response(data) ::
+          %{
+            "status" => String.t(),
+            optional("message") => String.t(),
+            optional("data") => data,
+            optional(String.t()) => json()
+          }
+          | error_response()
+
+  @type user_response :: api_response(%{"user" => user(), optional(String.t()) => json()})
+  @type login_response ::
+          api_response(%{
+            "user" => user(),
+            "token" => auth_token(),
+            optional(String.t()) => json()
+          })
+  @type users_response :: api_response(%{"users" => [user()], optional(String.t()) => json()})
+  @type roles_response :: api_response([role()])
+  @type dashboard_response :: api_response(json_map())
+  @type project_response :: project() | api_response(project())
+
   @doc """
-  This function will clear all caches that have been set by ex_auth
-  forcing a refresh when functions requiring the data are called
+  Clears locally cached ExAuth data.
+
+  This does not call the Auth API. It currently clears cached project roles so
+  the next `get_project_roles/2` call fetches fresh data from
+  `GET /api/v1/project/{project_id}/roles`.
   """
+  @spec clear_cache() :: any()
   def clear_cache do
     Helpers.cache_delete(:roles)
   end
 
+  @doc """
+  Verifies an Auth token.
+
+  Calls `POST /api/v1/project/{project_id}/verify_token` with a token and token
+  type, such as `"login"`, `"reset"`, or `"verify"`.
+  """
+  @spec verify_token(token(), token_type(), opts()) :: user_response()
   def verify_token(token, type \\ "login", opts \\ []) do
     project_id = Helpers.project_id(opts[:project_name])
     body = %{token: token, type: type}
@@ -23,6 +85,12 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_post_callback(url, body, Helpers.headers(nil, "ignored"))
   end
 
+  @doc """
+  Retrieves full user information as a project admin.
+
+  Calls `GET /api/v1/project/{project_id}/user/{user_id}`.
+  """
+  @spec get_user(user_id(), opts()) :: user_response()
   def get_user(user_id, opts \\ []) do
     url =
       Helpers.endpoint() <>
@@ -31,6 +99,13 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_get_callback(url, Helpers.headers(opts[:project_name]))
   end
 
+  @doc """
+  Retrieves public user information.
+
+  Calls `GET /api/v1/project/{project_id}/public_user/{user_id}` and returns
+  only fields configured as public in Auth.
+  """
+  @spec get_public_user(user_id(), opts()) :: user_response()
   def get_public_user(user_id, opts \\ []) do
     url =
       Helpers.endpoint() <>
@@ -40,8 +115,13 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-  Provided a `token` it will revoke it to avoid further usage
+  Revokes a token to prevent further usage.
+
+  Calls `POST /api/v1/project/{project_id}/logout` with a payload containing a
+  `:token` key.
   """
+  @spec logout(%{required(:token) => token(), optional(atom()) => json()}, opts()) ::
+          api_response(message_response())
   def logout(%{token: _} = params, opts \\ []) do
     url =
       Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/logout"
@@ -49,6 +129,12 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_post_callback(url, params, Helpers.headers(opts[:project_name]))
   end
 
+  @doc """
+  Deletes a project user as a project admin.
+
+  Calls `DELETE /api/v1/project/{project_id}/delete/{user_id}`.
+  """
+  @spec delete_user(user_id(), opts()) :: api_response(message_response())
   def delete_user(user_id, opts \\ []) do
     url =
       Helpers.endpoint() <>
@@ -57,6 +143,14 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_delete_callback(url, Helpers.headers(opts[:project_name]))
   end
 
+  @doc """
+  Retrieves project users as a project admin.
+
+  Calls `GET /api/v1/project/{project_id}/users` with query string filters and
+  optional `limit`/`start` pagination.
+  """
+  @spec get_users(json_map(), nil | non_neg_integer(), nil | non_neg_integer(), opts()) ::
+          users_response()
   def get_users(filter \\ %{}, limit \\ nil, start \\ 0, opts \\ [])
 
   def get_users(filter, limit, _start, opts) when limit in [nil, 0] do
@@ -72,6 +166,13 @@ defmodule ExAuth.AuthAPI do
     end
   end
 
+  @doc """
+  Internal request helper for v1 user search.
+
+  Calls `GET /api/v1/project/{project_id}/users` using the already-built
+  pagination query string.
+  """
+  @spec users(json_map(), String.t(), opts()) :: users_response()
   def users(filter, pagination, opts) do
     filter =
       filter
@@ -86,6 +187,13 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Registers a new project user.
+
+  Calls `POST /api/v1/project/{project_id}/register`. If an `:email` key is
+  present, ExAuth validates its format before making the request.
+  """
+  @spec register(json_map(), opts()) :: login_response() | error_response()
   def register(user, opts \\ [])
 
   def register(%{email: email} = user, opts) do
@@ -113,12 +221,26 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Logs in a project user.
+
+  Calls `POST /api/v1/project/{project_id}/login` and returns the user and login
+  token on success.
+  """
+  @spec login(json_map(), opts()) :: login_response()
   def login(user, opts \\ []) do
     url = Helpers.endpoint() <> "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/login"
 
     GeeksHelpers.endpoint_post_callback(url, user, Helpers.headers(opts[:project_name]))
   end
 
+  @doc """
+  Updates user information as a project admin.
+
+  Calls `PUT /api/v1/project/{project_id}/privateuser/{user_id}`. If an `:email`
+  key is present, ExAuth validates its format before making the request.
+  """
+  @spec update_private_user(json_map(), user_id(), opts()) :: user_response() | error_response()
   def update_private_user(user, user_id, opts \\ [])
 
   def update_private_user(%{email: email} = user, user_id, opts) do
@@ -146,6 +268,13 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(opts[:project_name]))
   end
 
+  @doc """
+  Updates the current user with a user token.
+
+  Calls `PUT /api/v1/project/{project_id}/user`. If an `:email` key is present,
+  ExAuth validates its format before making the request.
+  """
+  @spec update_user(json_map(), token(), opts()) :: user_response() | error_response()
   def update_user(user, user_token, opts \\ [])
 
   def update_user(%{email: email} = user, user_token, opts) do
@@ -172,6 +301,13 @@ defmodule ExAuth.AuthAPI do
     GeeksHelpers.endpoint_put_callback(url, user, Helpers.headers(nil, user_token))
   end
 
+  @doc """
+  Requests a reset password token.
+
+  Calls `POST /api/v1/project/{project_id}/reset_password`. If the payload has a
+  string `"user"` key, ExAuth validates it as an email before making the request.
+  """
+  @spec reset_password(json_map(), opts()) :: api_response(message_response()) | error_response()
   def reset_password(user, opts \\ [])
 
   def reset_password(%{"user" => email} = user, opts) do
@@ -201,10 +337,13 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-  Will get all the roles set in your AUTH project
-  If you enabled caching, the results will be stored locally and you can refresh it by providing the `true` param
-  If caching is not enabled, it will run a request to auth everytime this is called
+  Retrieves all roles configured for the Auth project.
+
+  Calls `GET /api/v1/project/{project_id}/roles` when the cache is empty or
+  `refresh` is `true`. This function returns the extracted role list from the
+  response `data`, not the full API envelope.
   """
+  @spec get_project_roles(boolean(), opts()) :: [role()]
   def get_project_roles(refresh \\ false, opts \\ []) do
     key =
       if is_nil(opts[:project_name]),
@@ -228,6 +367,12 @@ defmodule ExAuth.AuthAPI do
     end
   end
 
+  @doc """
+  Returns a role id by role title.
+
+  This does not call an endpoint directly; it reads from `get_project_roles/2`.
+  """
+  @spec get_role_id(String.t(), opts()) :: String.t()
   def get_role_id(role_title, opts \\ []) do
     [role_object] =
       get_project_roles(false, opts)
@@ -237,11 +382,12 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-  Provided a valid role_id will return the full role object
-  title and id
-  It is strongly advised to enable caching when calling this function
-  to avoid multiple requests to the Auth API
+  Returns a role object by role id.
+
+  This does not call an endpoint directly; it reads from `get_project_roles/2`.
+  Enabling caching is recommended to avoid repeated Auth API requests.
   """
+  @spec get_role_object(String.t(), opts()) :: role()
   def get_role_object(role_id, opts \\ []) do
     [role_object] =
       get_project_roles(false, opts)
@@ -250,6 +396,12 @@ defmodule ExAuth.AuthAPI do
     role_object
   end
 
+  @doc """
+  Verifies a user's password as a project admin.
+
+  Calls `POST /api/v1/project/{project_id}/user/{user_id}/verify_password`.
+  """
+  @spec verify_password(user_id(), String.t(), opts()) :: api_response(json_map())
   def verify_password(user_id, password, opts \\ []) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
@@ -259,6 +411,12 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Requests a new verification token for a user.
+
+  Calls `GET /api/v1/project/{project_id}/user/{user_id}/resend_verification`.
+  """
+  @spec send_verification(user_id(), opts()) :: api_response(message_response())
   def send_verification(user_id, opts \\ []) do
     GeeksHelpers.endpoint_get_callback(
       Helpers.endpoint() <>
@@ -267,6 +425,12 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Verifies a user as a project admin.
+
+  Calls `PUT /api/v1/project/{project_id}/verify_user/{user_id}`.
+  """
+  @spec verify_user(user_id(), opts()) :: user_response()
   def verify_user(user_id, opts \\ []) do
     GeeksHelpers.endpoint_put_callback(
       Helpers.endpoint() <>
@@ -276,6 +440,12 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Generates a login token for a project user as a project admin.
+
+  Calls `GET /api/v1/project/{project_id}/login/{user_id}`.
+  """
+  @spec login_as_user(user_id(), opts()) :: login_response()
   def login_as_user(user_id, opts \\ []) do
     GeeksHelpers.endpoint_get_callback(
       "#{Helpers.endpoint()}/api/v1/project/#{Helpers.project_id(opts[:project_name])}/login/#{user_id}",
@@ -284,14 +454,26 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-   Returns the url of the social media provider to send the user to so he authenticates with his Social account.
-   The provider will then redirect the user to the `redirect_uri` with a code that must be used server side
-   to collect the fields data.
+  Returns an OAuth provider URL for social login.
+
+  Calls the Auth OAuth authorization endpoint for the configured project. The
+  provider redirects the user to `redirect_uri` with a code to exchange through
+  `social_connect/5`.
   """
+  @spec get_social_connect_link(provider(), String.t(), nil | [String.t()], opts()) ::
+          api_response(json_map())
   def get_social_connect_link(provider, redirect_uri, scopes \\ nil, opts \\ []) do
     oauth_link([provider: provider, redirect_uri: redirect_uri, scopes: scopes], opts)
   end
 
+  @doc """
+  Builds and requests an OAuth authorization link.
+
+  Expects `:provider` and `:redirect_uri` in `params`, and optionally `:scopes`.
+  Calls the same Auth OAuth authorization endpoint as
+  `get_social_connect_link/4`.
+  """
+  @spec oauth_link(keyword(), opts()) :: api_response(json_map())
   def oauth_link(params, opts \\ []) do
     if is_nil(params[:provider]) or is_nil(params[:redirect_uri]),
       do: raise("provider and redirect_uri are mandatory")
@@ -309,12 +491,14 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-   Provided the code obtained from the authentication step, this will return the fields for the user account
-   alongside the operation type
-    - `register` if the user is not yet registered to auth
-    - `login` if a user with the same login field already exists
-   In case of a login, the response will also include a user_token
+  Exchanges an OAuth callback code for social account data.
+
+  Calls the Auth OAuth callback endpoint. The response includes the operation
+  type, such as `"register"` or `"login"`; login responses can include a user
+  token.
   """
+  @spec social_connect(provider(), String.t(), String.t(), nil | [String.t()], opts()) ::
+          api_response(json_map())
   def social_connect(provider, code, redirect_uri, fields \\ nil, opts \\ []) do
     oauth_token(
       [provider: provider, code: code, redirect_uri: redirect_uri, fields: fields],
@@ -322,6 +506,13 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Exchanges an OAuth callback code for account data.
+
+  Expects `:provider`, `:code`, and `:redirect_uri` in `params`, and optionally
+  `:fields`. Calls the same Auth OAuth callback endpoint as `social_connect/5`.
+  """
+  @spec oauth_token(keyword(), opts()) :: api_response(json_map())
   def oauth_token(params, opts \\ []) do
     if is_nil(params[:provider]) or is_nil(params[:code]) or is_nil(params[:redirect_uri]),
       do: raise("provider, code and redirect_uri are mandatory")
@@ -338,6 +529,12 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Refreshes stored OAuth provider data for a user.
+
+  Calls `GET /api/v1/project/{project_id}/{provider}/refresh/{user_id}`.
+  """
+  @spec refresh_token(user_id(), provider(), opts()) :: api_response(json_map())
   def refresh_token(user_id, provider, opts \\ []) do
     GeeksHelpers.endpoint_get_callback(
       Helpers.endpoint() <>
@@ -347,9 +544,13 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-  Takes an ID as a parameter to return a challenge for signature.
-  The nature of the challenge depends on the configuration of the `login_field` on the project
+  Returns a challenge for signature-based authentication.
+
+  Calls `POST /api/v1/project/{project_id}/login_challenge`. The challenge
+  depends on the project's configured `login_field`.
   """
+  @spec get_challenge(json_map(), opts()) ::
+          api_response(%{"challenge" => String.t(), optional(String.t()) => json()})
   def get_challenge(id, opts \\ []) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
@@ -360,10 +561,13 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-  Given an ID, a challenge and the signature of this challenge, it validates the signature and returns a user token.
-  - It will register a new user if the ID is new
-  - It will login the user carrying the ID if it exists already
+  Logs in or registers a user with a signed challenge.
+
+  Calls `POST /api/v1/project/{project_id}/connect` with the identifier,
+  challenge, and signature. Auth registers a new user when the identifier is new
+  and logs in the existing user otherwise.
   """
+  @spec connect(json_map(), opts()) :: login_response()
   def connect(connect, opts \\ []) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
@@ -374,11 +578,12 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
-  Provides the result of the dashboard for the given facets:
-  - facets: a list of facet ['totalRegisteredUsers','referrerLeaderboard' etc..]
-  - (optional) time_start: a timestamp to define the start date for range facets
-  - (optional) time_end: a timestamp to define the end date for range facets
+  Returns dashboard data for the given facets.
+
+  Calls `POST /api/v1/project/{project_id}/dashboard` with a list of facets, for
+  example `"totalRegisteredUsers"` or `"referrerLeaderboard"`.
   """
+  @spec dashboard([String.t()], opts()) :: dashboard_response()
   def dashboard(facets, opts \\ []) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
@@ -388,6 +593,13 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Returns dashboard data for the given facets and timeframe.
+
+  Calls `POST /api/v1/project/{project_id}/dashboard` with `facets` and a
+  `timeframe` containing `start` and `end` timestamps.
+  """
+  @spec dashboard([String.t()], integer(), integer(), opts()) :: dashboard_response()
   def dashboard(facets, time_start, time_end, opts \\ []) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
@@ -397,6 +609,12 @@ defmodule ExAuth.AuthAPI do
     )
   end
 
+  @doc """
+  Retrieves the configured Auth project.
+
+  Calls `GET /api/v1/project/{project_id}`.
+  """
+  @spec get_project(opts()) :: project_response()
   def get_project(opts \\ []) do
     GeeksHelpers.endpoint_get_callback(
       Helpers.endpoint() <>
