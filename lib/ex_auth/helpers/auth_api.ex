@@ -337,6 +337,22 @@ defmodule ExAuth.AuthAPI do
   end
 
   @doc """
+  Sets a new password using a reset token.
+
+  Calls `POST /api/v1/project/{project_id}/new_password` with the reset token in
+  the `token` header and the new password in the request body.
+  """
+  @spec new_password(String.t(), token(), opts()) :: api_response(message_response())
+  def new_password(password, token, opts \\ []) do
+    GeeksHelpers.endpoint_post_callback(
+      Helpers.endpoint() <>
+        "/api/v1/project/#{Helpers.project_id(opts[:project_name])}/new_password",
+      %{"password" => password},
+      Helpers.headers(nil, token)
+    )
+  end
+
+  @doc """
   Retrieves all roles configured for the Auth project.
 
   Calls `GET /api/v1/project/{project_id}/roles` when the cache is empty or
