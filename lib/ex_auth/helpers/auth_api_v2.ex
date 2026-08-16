@@ -22,19 +22,14 @@ defmodule ExAuth.AuthAPIV2 do
   @type json_map :: %{optional(String.t() | atom()) => json()}
   @type opts :: keyword(String.t())
   @type user_id :: String.t()
-  @type user :: %{"user_id" => String.t(), optional(String.t()) => json()}
-  @type message_response :: %{"message" => String.t(), optional(String.t()) => json()}
-  @type error_response :: %{"message" => String.t(), optional(String.t()) => json()}
+  @type user :: %{optional(String.t()) => json()}
+  @type message_response :: %{optional(String.t()) => json()}
+  @type error_response :: %{optional(String.t()) => json()}
   @type api_response(data) ::
-          %{
-            "status" => String.t(),
-            optional("message") => String.t(),
-            optional("data") => data,
-            optional(String.t()) => json()
-          }
+          %{optional(String.t()) => data | json()}
           | error_response()
 
-  @type users_response :: api_response(%{"users" => [user()], optional(String.t()) => json()})
+  @type users_response :: api_response(%{optional(String.t()) => [user()] | json()})
 
   @doc """
   Retrieves project users as a project admin using the v2 search endpoint.
@@ -81,8 +76,11 @@ defmodule ExAuth.AuthAPIV2 do
   Calls `POST /api/v2/project/{project_id}/user/{user_id}/resend_verification`
   and sends `%{"metadata" => metadata}` as the request body.
   """
-  @spec send_verification(user_id(), json_map(), opts()) :: api_response(message_response())
-  def send_verification(user_id, metadata \\ %{}, opts \\ []) when not is_nil(user_id) do
+  @spec send_verification(nil | user_id(), json_map(), opts()) ::
+          api_response(message_response()) | json_map()
+  def send_verification(user_id, metadata \\ %{}, opts \\ [])
+
+  def send_verification(user_id, metadata, opts) when not is_nil(user_id) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
         "/api/v2/project/#{Helpers.project_id(opts[:project_name])}/user/#{user_id}/resend_verification",
@@ -91,15 +89,6 @@ defmodule ExAuth.AuthAPIV2 do
     )
   end
 
-  @doc """
-  Returns a local failure when no user id is provided.
-
-  This clause does not call the Auth API.
-  """
-  @spec send_verification(nil, json_map(), opts()) :: %{
-          "status" => "failed",
-          "message" => String.t()
-        }
   def send_verification(_, _, _),
     do: %{"status" => "failed", "message" => "ExAuth: Provide a user_id"}
 end

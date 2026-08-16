@@ -38,7 +38,7 @@ defmodule ExAuth.AuthClient do
 
   def handle_disconnected(reason, state) do
     Logger.error("ex_auth: disconnected - #{inspect(reason)}")
-    if Helpers.ws_reconnect, do: Process.send_after(self(), :connect, :timer.seconds(1))
+    if Helpers.ws_reconnect(), do: Process.send_after(self(), :connect, :timer.seconds(1))
     {:ok, state}
   end
 
@@ -101,9 +101,10 @@ defmodule ExAuth.AuthClient do
       ) do
     Logger.debug("ex_auth: message on topic #{topic} - #{event} #{inspect(payload)}")
 
-    action = event <> "_action"
-    |> String.to_atom()
-    |> Helpers.env()
+    action =
+      (event <> "_action")
+      |> String.to_atom()
+      |> Helpers.env()
 
     unless is_nil(action), do: apply(action[:module], action[:function], [payload])
 

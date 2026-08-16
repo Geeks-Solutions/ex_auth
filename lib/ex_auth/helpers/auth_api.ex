@@ -25,33 +25,20 @@ defmodule ExAuth.AuthAPI do
   @type token :: String.t()
   @type token_type :: String.t()
   @type provider :: String.t()
-  @type role :: %{"id" => String.t(), "title" => String.t(), optional(String.t()) => json()}
-  @type user :: %{"user_id" => String.t(), optional(String.t()) => json()}
+  @type role :: %{optional(String.t()) => json()}
+  @type user :: %{optional(String.t()) => json()}
   @type project :: %{optional(String.t()) => json()}
-  @type auth_token :: %{
-          "type" => String.t(),
-          "token" => String.t(),
-          optional(String.t()) => json()
-        }
-  @type message_response :: %{"message" => String.t(), optional(String.t()) => json()}
-  @type error_response :: %{"message" => String.t(), optional(String.t()) => json()}
+  @type auth_token :: %{optional(String.t()) => json()}
+  @type message_response :: %{optional(String.t()) => json()}
+  @type error_response :: %{optional(String.t()) => json()}
   @type api_response(data) ::
-          %{
-            "status" => String.t(),
-            optional("message") => String.t(),
-            optional("data") => data,
-            optional(String.t()) => json()
-          }
+          %{optional(String.t()) => data | json()}
           | error_response()
 
-  @type user_response :: api_response(%{"user" => user(), optional(String.t()) => json()})
+  @type user_response :: api_response(%{optional(String.t()) => user() | json()})
   @type login_response ::
-          api_response(%{
-            "user" => user(),
-            "token" => auth_token(),
-            optional(String.t()) => json()
-          })
-  @type users_response :: api_response(%{"users" => [user()], optional(String.t()) => json()})
+          api_response(%{optional(String.t()) => user() | auth_token() | json()})
+  @type users_response :: api_response(%{optional(String.t()) => [user()] | json()})
   @type roles_response :: api_response([role()])
   @type dashboard_response :: api_response(json_map())
   @type project_response :: project() | api_response(project())
@@ -565,8 +552,7 @@ defmodule ExAuth.AuthAPI do
   Calls `POST /api/v1/project/{project_id}/login_challenge`. The challenge
   depends on the project's configured `login_field`.
   """
-  @spec get_challenge(json_map(), opts()) ::
-          api_response(%{"challenge" => String.t(), optional(String.t()) => json()})
+  @spec get_challenge(json_map(), opts()) :: api_response(json_map())
   def get_challenge(id, opts \\ []) do
     GeeksHelpers.endpoint_post_callback(
       Helpers.endpoint() <>
